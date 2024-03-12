@@ -1,0 +1,162 @@
+/*studentsTable*/
+#Students table {
+    margin-top: 10px;
+    width: 100%;
+    border-collapse: collapse;
+    background-color: rgba(0, 0, 0, 0.30);
+    color: #ffffff;
+}
+
+#studentsTable thead {
+    background: linear-gradient(0.3turn,
+    rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+}
+
+#Students th,
+#Students td {
+    padding: 15px;
+    border-right: 1px solid #333;
+    border-bottom: 1px solid #333;
+    text-align: center;
+}
+
+#Students th {
+    /*background-color: #dee3e8;*/
+    text-align: center;
+}
+
+#Students tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.30);
+}
+
+#Students tr:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+#Students button {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    border-radius: 4px;
+}
+
+#Students button:hover {
+    opacity: 0.8;
+}
+
+.delete-button {
+    background-color: rgb(30, 31, 34);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.edit-button {
+    background-color: rgb(30, 31, 34);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.delete-button:hover,
+.edit-button:hover {
+    opacity: 0.8;
+}
+
+
+/*pagination*/
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+    padding: 0;
+}
+
+.pagination button {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.page-numbers {
+    margin: 1em 1em 0;
+}
+
+.page-number {
+    padding: 0.5em;
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.active {
+    opacity: 1;
+}
+
+.status-active,
+.status-inactive {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 5px;
+}
+
+.status-active {
+    background-color: rgba(172, 156, 218, 0.7);
+}
+
+.status-inactive {
+    background-color: gray;
+}
+
+
+.cell {
+    width: 20vh;
+}
+
+@media screen and (max-width: 600px) {
+
+    #Students button {
+        padding: 3px 5px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+    }
+
+    #studentsTable .cell {
+
+    }
+
+    #studentsTable td {
+        font-size: 12px;
+    }
+
+    #Students button img {
+        width: 4px;
+        height: 4px;
+    }
+}
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: inline-flex;
+    align-items: center;
+}
+
+button .add {
+    margin-left: auto;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+button:hover .add {
+    filter: invert(60%);
+}
