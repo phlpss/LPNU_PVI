@@ -14,7 +14,7 @@
     left: 0;
     z-index: -1;
     color: #CCCCCC;
-    background-image: url("/assets/blue-background.jpg");
+    background-image: url("../assets/blue-background.jpg");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
