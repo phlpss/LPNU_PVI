@@ -2,7 +2,7 @@
     color: #dddddd;
     display: flex;
     flex-flow: row wrap;
-    margin-top: 82px;
+    margin-top: 10px;
 }
 
 .tabandcontent::before {
@@ -13,7 +13,8 @@
     bottom: 0;
     left: 0;
     z-index: -1;
-    background-image: url('https://wallpapertag.com/wallpaper/full/5/3/1/379377-dark-blue-wallpaper-1920x1080-ios.jpg');
+    color: #CCCCCC;
+    background-image: url("/assets/blue-background.jpg");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -74,13 +75,16 @@
         display: flex;
         flex-flow: row wrap;
         align-items: center;
-        width: auto;
+        width: 100%;
     }
 
     .tab button {
         width: 33%;
-        padding: 10px 10px;
+        padding: 10px 30px;
         text-align: center;
+
+        border-radius: 0;
+        margin: 0;
     }
 
     .tabcontent {
@@ -88,6 +92,6 @@
     }
 
     .tabandcontent {
-        flex-direction: column;
+        flex-direction: row;
     }
 }

@@ -118,7 +118,7 @@
     width: 20vh;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
 
     #Students button {
         padding: 3px 5px;
@@ -140,6 +140,7 @@
         height: 4px;
     }
 }
+
 button {
     background: none;
     border: none;

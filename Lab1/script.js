@@ -1,10 +1,20 @@
+let currentPage;
 // Initial render
 document.addEventListener("DOMContentLoaded", function () {
     renderStudents(currentPage);
 });
+document.getElementById('dashboardTab').addEventListener('click', function(e) {
+    openTab(e, 'Dashboard');
+});
+document.getElementById('studentsTab').addEventListener('click', function(e) {
+    openTab(e, 'Students');
+});
+document.getElementById('tasksTab').addEventListener('click', function(e) {
+    openTab(e, 'Tasks');
+});
 
 function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
+    let i, tabcontent, tablinks;
 
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
@@ -21,7 +31,7 @@ function openTab(evt, tabName) {
 }
 
 
-var studentsData = [
+const studentsData = [
     {group: "PZ-28", name: "Sofiyka Yaroshovych", gender: "Female", birthday: "2000-01-01", status: "Active"},
     {group: "PZ-28", name: "Andriy Kmitlyvyi", gender: "Male", birthday: "2000-02-02", status: "Inactive"},
     {group: "PZ-28", name: "Fitia Boem", gender: "Male", birthday: "2000-02-02", status: "Active"},
@@ -30,15 +40,15 @@ var studentsData = [
     {group: "PZ-28", name: "Blad Staryi", gender: "Male", birthday: "2000-02-02", status: "Active"},
     {group: "PZ-28", name: "Danya Smyak", gender: "Male", birthday: "2000-02-02", status: "Inactive"},
 ];
-var currentPage = 1;
-var studentsPerPage = 10;
+currentPage = 1;
+const studentsPerPage = 10;
 
 function createStudent() {
-    var group = document.getElementById('group').value;
-    var fname = document.getElementById('fname').value;
-    var lname = document.getElementById('lname').value;
-    var gender = document.getElementById('gender').value;
-    var bday = document.getElementById('bday').value;
+    const group = document.getElementById('group').value;
+    const fname = document.getElementById('fname').value;
+    const lname = document.getElementById('lname').value;
+    const gender = document.getElementById('gender').value;
+    const bday = document.getElementById('bday').value;
 
     if (!group || !fname || !lname || !gender || !bday) {
         alert('Please fill in all fields.');
@@ -109,7 +119,7 @@ function renderStudents(page) {
 
 const modal = document.getElementById("addModal");
 let closeButton = modal.querySelector(".cancelStudentBt");
-let confirmButton = modal.querySelector(".confirmStudentBt");
+// let confirmButton = modal.querySelector(".confirmStudentBt");
 
 function OpenAddStudentModal() {
     modal.style.display = "block";
@@ -120,7 +130,7 @@ function CloseAddStudentModal() {
 }
 
 closeButton.addEventListener("click", CloseAddStudentModal);
-confirmButton.addEventListener("click", createStudent);
+// confirmButton.addEventListener("click", createStudent);
 
 window.addEventListener("click", function (event) {
     if (event.target === modal) {
@@ -211,15 +221,13 @@ function updateStudent() {
         return;
     }
 
-    var editedStudent = {
+    studentsData[currentEditIndex] = {
         group: group,
         name: fname + ' ' + lname,
         gender: gender,
         birthday: bday,
         status: "Active" // not editable
     };
-
-    studentsData[currentEditIndex] = editedStudent;
     renderStudents(currentPage);
     CloseEditStudentModal();
 }
@@ -266,4 +274,3 @@ window.addEventListener('resize', function () {
         });
     }
 });
-
