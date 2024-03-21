@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        #addTaskForm {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #addTaskForm input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 8px;
+            width: 300px;
+        }
+
+        #addTaskForm select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        #addTaskForm button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #addTaskForm button:hover {
+            background-color: #4cae4c;
+        }
+
+        #taskList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #taskList li {
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #taskList button {
+            padding: 6px 12px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #taskList button:hover {
+            background-color: #c9302c;
+        }
+
+        .high-priority {
+            border-left: 4px solid red;
+        }
+
+        .medium-priority {
+            border-left: 4px solid orange;
+        }
+
+        .low-priority {
+            border-left: 4px solid green;
+        }
+
+        .delete-button {
+            padding: 6px 12px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #c9302c;
+        }
+    </style>
+
+    <script src="taskManager.js" defer></script>
+</head>
+<body>
+<h2>Course Completion To-Do List</h2>
+
+<form id="addTaskForm">
+    <input type="text" id="taskName" placeholder="Enter a new task" required>
+    <select id="taskPriority">
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+    </select>
+    <button type="submit">Add Task</button>
+</form>
+
+<ul id="taskList">
+    <!-- Task items will be added here dynamically -->
+</ul>
+</body>
+</html>

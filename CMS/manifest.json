@@ -1,0 +1,96 @@
+{
+  "name": "CMS",
+  "short_name": "CMS",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f6f8f9",
+  "theme_color": "#f6f8f9",
+  "description": "A system for managing students, tasks, and notifications.",
+  "icons": [
+    {
+      "srs": "assets/sir-capybara.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/add_user.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/bell_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/bell_icon_white.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/calendar_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/cross_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/delete_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/edit_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/next_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/prev_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/tick_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/user_icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/user_icon_white.svg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/blue-background.jpg",
+      "sizes": "48x48 72x72 96x96 128x128 150x150 256x256 512x512 1024x1024",
+      "type": "image/jpg+png",
+      "purpose": "any"
+    }
+  ],
+  "orientation": "any"
+}
