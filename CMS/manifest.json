@@ -8,8 +8,8 @@
   "description": "A system for managing students, tasks, and notifications.",
   "icons": [
     {
-      "srs": "assets/sir-capybara.png",
-      "sizes": "1024x1024",
+      "src": "assets/sir-capybara.png",
+      "sizes": "700x700",
       "type": "image/png",
       "purpose": "maskable"
     },

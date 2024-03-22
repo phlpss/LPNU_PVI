@@ -1,27 +1,43 @@
-document.getElementById('addTaskForm').onsubmit = function(event) {
-    event.preventDefault();
+$(document).ready(function() {
+    $('#addTaskForm').on('submit', function(event) {
+        event.preventDefault();
 
-    // Get task name and priority
-    var taskName = document.getElementById('taskName').value;
-    var taskPriority = document.getElementById('taskPriority').value;
-    var taskList = document.getElementById('taskList');
+        // Get task name and priority
+        var taskName = $('#taskName').val();
+        var taskPriority = $('#taskPriority').val();
 
-    // Create the list item
-    var li = document.createElement('li');
-    li.textContent = taskName;
-    li.className = taskPriority + '-priority';
+        // Create the list item with Bootstrap classes
+        var li = $('<li></li>')
+            .addClass('list-group-item')
+            .text(taskName);
 
-    // Add delete button
-    var deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.onclick = function() {
-        taskList.removeChild(li);
-    };
-    li.appendChild(deleteBtn);
+        // Apply priority-based styling
+        switch(taskPriority) {
+            case 'high':
+                li.addClass('list-group-item-danger');
+                break;
+            case 'medium':
+                li.addClass('list-group-item-warning');
+                break;
+            case 'low':
+                li.addClass('list-group-item-success');
+                break;
+        }
 
-    // Add the list item to the list
-    taskList.appendChild(li);
+        // Create and add the delete button
+        var deleteBtn = $('<button>Delete</button>')
+            .addClass('btn btn-danger btn-sm')
+            .click(function() {
+                li.remove();
+            });
 
-    // Clear the input
-    document.getElementById('taskName').value = '';
-};
+        // Append the delete button to the list item
+        li.append(deleteBtn);
+
+        // Add the list item to the task list
+        $('#taskList').append(li);
+
+        // Clear the input
+        $('#taskName').val('');
+    });
+});

@@ -21,9 +21,6 @@
     <script src="todo.js" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-<!--    <link rel="stylesheet"href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
-<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
-
 </head>
 <body>
 <!--NavBar-->
@@ -75,6 +72,10 @@
                     <h2>Add Student</h2>
                 </div>
                 <div class="modal-body">
+                    <div class="input-group">
+                        <input type="hidden" id="add-studentId" name="add-studentId">
+                    </div>
+
                     <div class="input-group">
                         <label for="group">Group:</label>
                         <select id="group" name="group">
@@ -132,6 +133,10 @@
                     <h2>Edit Student</h2>
                 </div>
                 <div class="modal-body">
+                    <div class="input-group">
+                        <input type="hidden" id="edit-studentId" name="edit-studentId">
+                    </div>
+
                     <div class="input-group">
                         <label for="edit-group">Group:</label>
                         <select id="edit-group" name="edit-group">

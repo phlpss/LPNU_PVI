@@ -43,7 +43,7 @@ $(function () {
 class Student {
     static idCounter = 0;
 
-    constructor(group, name, gender, birthday, status = "Active") {
+    constructor(id, group, name, gender, birthday, status = "Active") {
         this.id = Student.idCounter++;
         this.group = group;
         this.name = name;
@@ -54,8 +54,8 @@ class Student {
 }
 
 const studentsData = [
-    new Student("PZ-28", "Sofiyka Yaroshovych", "Female", "2005-09-30"),
-    new Student("PZ-28", "Nazik Nafta", "Male", "2000-02-02", "Inactive"),
+    new Student("3000", "PZ-22", "Katya Hilfanova", "Female", "2005-01-12"),
+    new Student("4000", "PZ-28", "Olia Hnatetska", "Female", "2000-02-02", "Inactive"),
 ];
 
 function openTab(evt, tabName) {
@@ -116,6 +116,7 @@ function updateAllCheckboxes(checked) {
 }
 
 function createStudent() {
+    const tempStudentId = $('#add-studentId').val();
     const group = $('#group').val();
     const fname = $('#fname').val();
     const lname = $('#lname').val();
@@ -127,15 +128,28 @@ function createStudent() {
         return;
     }
 
-    addStudent(group, fname + ' ' + lname, gender, bday);
+    const namePattern = /^[A-Z][a-z]+$/;
+    if (!fname.trim() || !namePattern.test(fname)) {
+        alert('First name must start with an uppercase letter and be followed by lowercase letters.');
+        return;
+    }
+    if (!lname.trim() || !namePattern.test(lname)) {
+        alert('Last name must start with an uppercase letter and be followed by lowercase letters.');
+        return;
+    }
+
+    addStudent(tempStudentId, group, fname + ' ' + lname, gender, bday);
     $('#addModal').hide();
 }
 
-function addStudent(group, name, gender, birthday) {
-    const newStudent = new Student(group, name, gender, birthday);
+function addStudent(studentId, group, name, gender, birthday) {
+    const newStudent = new Student(studentId, group, name, gender, birthday);
     studentsData.push(newStudent);
     sendStudentDataToServer(newStudent);
     renderStudents(currentPage);
+}
+function generateStudentId() {
+    return  Math.floor(Math.random() * 1000000).toString();
 }
 
 function sendStudentDataToServer(student) {
@@ -172,6 +186,9 @@ function sendStudentDataToServer(student) {
 
 // Function to open the 'Add Student' modal
 function OpenAddStudentModal() {
+    const tempStudentId = generateStudentId();
+    $('#add-studentId').val(tempStudentId);
+
     $('#addModal').show();
 }
 
@@ -207,6 +224,8 @@ function CloseDeleteConfirmationModal() {
 function editStudent(index) {
     currentEditIndex = index;
     const student = studentsData[index];
+    $('#edit-studentId').val(student.id);
+
     $('#edit-group').val(student.group);
     const nameParts = student.name.split(' ');
     $('#edit-fname').val(nameParts[0]);
@@ -235,7 +254,17 @@ function updateStudent() {
     const gender = $('#edit-gender').val();
     const bday = $('#edit-bday').val();
 
-    if (!group || !fname || !lname || !gender || !bday) {
+    const namePattern = /^[A-Z][a-z]+$/;
+    if (!fname.trim() || !namePattern.test(fname)) {
+        alert('First name must start with an uppercase letter and be followed by lowercase letters.');
+        return;
+    }
+    if (!lname.trim() || !namePattern.test(lname)) {
+        alert('Last name must start with an uppercase letter and be followed by lowercase letters.');
+        return;
+    }
+
+    if (!group || !gender || !bday) {
         alert('Please fill in all fields.');
         return;
     }
