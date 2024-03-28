@@ -42,7 +42,6 @@ $(function () {
 
 class Student {
     static idCounter = 0;
-
     constructor(id, group, name, gender, birthday, status = "Active") {
         this.id = Student.idCounter++;
         this.group = group;
@@ -123,20 +122,20 @@ function createStudent() {
     const gender = $('#gender').val();
     const bday = $('#bday').val();
 
-    if (!group || !fname || !lname || !gender || !bday) {
-        alert('Please fill in all fields.');
-        return;
-    }
-
-    const namePattern = /^[A-Z][a-z]+$/;
-    if (!fname.trim() || !namePattern.test(fname)) {
-        alert('First name must start with an uppercase letter and be followed by lowercase letters.');
-        return;
-    }
-    if (!lname.trim() || !namePattern.test(lname)) {
-        alert('Last name must start with an uppercase letter and be followed by lowercase letters.');
-        return;
-    }
+    // if (!group || !fname || !lname || !gender || !bday) {
+    //     alert('Please fill in all fields.');
+    //     return;
+    // }
+    //
+    // const namePattern = /^[A-Z][a-z]+$/;
+    // if (!fname.trim() || !namePattern.test(fname)) {
+    //     alert('First name must start with an uppercase letter and be followed by lowercase letters.');
+    //     return;
+    // }
+    // if (!lname.trim() || !namePattern.test(lname)) {
+    //     alert('Last name must start with an uppercase letter and be followed by lowercase letters.');
+    //     return;
+    // }
 
     addStudent(tempStudentId, group, fname + ' ' + lname, gender, bday);
     $('#addModal').hide();
@@ -144,30 +143,57 @@ function createStudent() {
 
 function addStudent(studentId, group, name, gender, birthday) {
     const newStudent = new Student(studentId, group, name, gender, birthday);
-    studentsData.push(newStudent);
-    sendStudentDataToServer(newStudent);
-    renderStudents(currentPage);
+
+    sendStudentDataToServer(newStudent, 'add').then(data => {
+        studentsData.push(newStudent);
+        renderStudents(currentPage);
+    }).catch(error => {
+        console.error('Error sending data to the server:', error);
+        if (error && error.error) {
+            alert(error.error);
+        }
+    });
 }
+
 function generateStudentId() {
-    return  Math.floor(Math.random() * 1000000).toString();
+    return Math.floor(Math.random() * 1000000).toString();
 }
 
-function sendStudentDataToServer(student) {
-    const url = 'http://localhost:8080/api/v1/customer';
+function sendStudentDataToServer(student, operation) {
+    console.log('Operation:', operation);
+    let url = 'http://localhost:8080/api/v1/customer';
+    let method = 'POST';
 
-    const data = JSON.stringify({
+    switch (operation) {
+        case 'add':
+            // URL remains the same, method is POST
+            break;
+        case 'edit':
+            url += `/${student.id}`; // Adjusted for PUT request
+            method = 'PUT';
+            break;
+        case 'delete':
+            url += `/${student.id}`; // Adjusted for DELETE request
+            method = 'DELETE';
+            break;
+        default:
+            throw new Error('Invalid operation');
+    }
+
+    const data = operation !== 'delete' ? JSON.stringify({
         Id: (student.id).toString(),
         Group: student.group,
         Name: student.name,
         Gender: student.gender,
         Birthday: student.birthday,
         Status: student.status
-    });
+    }) : null;
 
     console.log(data);
 
-    fetch(url, {
-        method: 'POST',
+
+    return fetch(url, {
+        method: method,
         headers: {
             'Content-Type': 'application/json'
         },
@@ -175,12 +201,17 @@ function sendStudentDataToServer(student) {
     }).then(response => {
         if (response.ok) {
             return response.json();
+        } else {
+            return response.json().then(errorResponse => {
+                return Promise.reject(errorResponse);
+            });
         }
-        throw new Error('Network response was not ok.');
     }).then(data => {
         console.log('Success:', data);
+        return data;
     }).catch(error => {
         console.error('There has been a problem with your fetch operation:', error);
+        return Promise.reject(error);
     });
 }
 
