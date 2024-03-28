@@ -1,5 +1,10 @@
+import {postStudent} from "./studentHTTPClient.js";
+import {putStudent} from "./studentHTTPClient.js";
+import {delStudent} from "./studentHTTPClient.js";
+
 let currentPage = 1;
 const studentsPerPage = 10;
+let currentEditingStudentId = 0;
 
 $(function () {
     renderStudents(currentPage);
@@ -31,30 +36,56 @@ $(function () {
         }
     });
 
+    $('#addStudentButton').click(function () {
+        $('#addModal').show();
+    });
+
+    $('#createStudentButton').click(createStudent);
+
+    $('#updateStudentButton').click(function () {
+        const studentId = 1;    /////// get student id correctly
+        if (studentId) {
+            updateStudent(studentId);
+        } else {
+            alert("No student selected for editing");
+        }
+    });
+
+    $('#confirmDeleteStudent').click(function () {
+        // if(currentEditingStudentId) {
+        //     deleteStudent(currentEditingStudentId);
+        // } else {
+        //     alert("No student selected for deleting");
+        // }
+        deleteStudent(currentEditingStudentId);
+    });
+
+
     // Select All Checkboxes Event Listener
     $("#studentsTable thead input[type='checkbox']").change(function () {
         $("#studentsTable tbody input[type='checkbox']").prop('checked', this.checked);
     });
 
     $(window).resize(resizeTableHeaders);
-    resizeTableHeaders(); // Initial call to set correct labels
+    resizeTableHeaders();
 });
 
 class Student {
     static idCounter = 0;
-    constructor(id, group, name, gender, birthday, status = "Active") {
+
+    constructor(group, name, gender, birthday) {
         this.id = Student.idCounter++;
         this.group = group;
         this.name = name;
         this.gender = gender;
         this.birthday = birthday;
-        this.status = status;
+        this.status = "Active";
     }
 }
 
 const studentsData = [
-    new Student("3000", "PZ-22", "Katya Hilfanova", "Female", "2005-01-12"),
-    new Student("4000", "PZ-28", "Olia Hnatetska", "Female", "2000-02-02", "Inactive"),
+    new Student("PZ-22", "Katya Hilfanova", "Female", "2005-01-12"),
+    new Student("PZ-28", "Olia Hnatetska", "Female", "2000-02-02", "Inactive"),
 ];
 
 function openTab(evt, tabName) {
@@ -84,18 +115,27 @@ function renderStudents(page) {
         const $statusIndicator = $('<span></span>').addClass(statusClass).attr('title', student.status);
         $row.append($('<td></td>').append($statusIndicator));
 
+        // const $deleteButton = $('<button></button>')
+        //     .html('<img src="assets/delete_icon.svg" alt="Delete Icon" style="width: 16px; height: 16px;">')
+        //     .addClass("delete-button")
+        //     .click(function () {
+        //         deleteStudent(index + startIndex);
+        //     });
         const $deleteButton = $('<button></button>')
             .html('<img src="assets/delete_icon.svg" alt="Delete Icon" style="width: 16px; height: 16px;">')
             .addClass("delete-button")
             .click(function () {
-                deleteStudent(index + startIndex);
+                // Retrieve the whole student object
+                const student = studentsData[index + startIndex];
+                delStudent(student.id);
             });
 
         const $editButton = $('<button></button>')
             .html('<img src="assets/edit_icon.svg" alt="Edit Icon" style="width: 16px; height: 16px;">')
             .addClass("edit-button")
             .click(function () {
-                editStudent(index + startIndex);
+                const student = studentsData[index + startIndex];
+                editStudent(student.id);
             });
 
         const $spacer = $('<span></span>').css('marginRight', '5px');
@@ -115,7 +155,6 @@ function updateAllCheckboxes(checked) {
 }
 
 function createStudent() {
-    const tempStudentId = $('#add-studentId').val();
     const group = $('#group').val();
     const fname = $('#fname').val();
     const lname = $('#lname').val();
@@ -137,14 +176,14 @@ function createStudent() {
     //     return;
     // }
 
-    addStudent(tempStudentId, group, fname + ' ' + lname, gender, bday);
+    addStudent(group, fname + ' ' + lname, gender, bday);
     $('#addModal').hide();
 }
 
-function addStudent(studentId, group, name, gender, birthday) {
-    const newStudent = new Student(studentId, group, name, gender, birthday);
+function addStudent(group, name, gender, birthday) {
+    const newStudent = new Student(group, name, gender, birthday);
 
-    sendStudentDataToServer(newStudent, 'add').then(data => {
+    postStudent(newStudent).then(data => {
         studentsData.push(newStudent);
         renderStudents(currentPage);
     }).catch(error => {
@@ -155,42 +194,134 @@ function addStudent(studentId, group, name, gender, birthday) {
     });
 }
 
-function generateStudentId() {
-    return Math.floor(Math.random() * 1000000).toString();
+function updateStudent(studentId) {
+    const group = $('#edit-group').val();
+    const fname = $('#edit-fname').val();
+    const lname = $('#edit-lname').val();
+    const gender = $('#edit-gender').val();
+    const bday = $('#edit-bday').val();
+
+    // const namePattern = /^[A-Z][a-z]+$/;
+    // if (!fname.trim() || !namePattern.test(fname) || !lname.trim() || !namePattern.test(lname)) {
+    //     alert('Names must start with an uppercase letter and be followed by lowercase letters.');
+    //     return;
+    // }
+    // if (!group || !gender || !bday) {
+    //     alert('Please fill in all fields.');
+    //     return;
+    // }
+
+    const updatedStudent = {
+        id: studentId,
+        group: group,
+        name: fname + ' ' + lname,
+        gender: gender,
+        birthday: bday
+    };
+
+    putStudent(updatedStudent).then(data => {
+        const index = studentsData.findIndex(student => student.id === studentId);
+        studentsData[index] = updatedStudent;
+        renderStudents(currentPage);
+        closeEditStudentModal();
+    }).catch(error => {
+        console.error('Error updating student:', error);
+        if (error && error.error) {
+            alert(error.error);
+        }
+    });
 }
 
-function sendStudentDataToServer(student, operation) {
-    console.log('Operation:', operation);
-    let url = 'http://localhost:8080/api/v1/customer';
+function editStudent(studentId) {
+    const studentToEdit = studentsData.find(s => s.id === studentId);
+    if (!studentToEdit) {
+        console.error('Student not found');
+        return;
+    }
+
+    $('#edit-studentId').val(studentToEdit.id);
+    $('#edit-group').val(studentToEdit.group);
+    const nameParts = studentToEdit.name.split(' ');
+    $('#edit-fname').val(nameParts[0]);
+    $('#edit-lname').val(nameParts.slice(1).join(' '));
+    $('#edit-gender').val(studentToEdit.gender);
+    $('#edit-bday').val(studentToEdit.birthday);
+
+    openEditStudentModal();
+}
+
+function deleteStudent(studentId) {
+    const studentToDelete = studentsData.find(s => s.id === studentId);
+    if (!studentToDelete) {
+        console.error('Student not found');
+        return;
+    }
+
+    sendStudentDataToServer(studentToDelete, 'delete').then(() => {
+        const index = studentsData.findIndex(s => s.id === studentId);
+        if (index !== -1) {
+            studentsData.splice(index, 1);
+        }
+        renderStudents(currentPage);
+        closeDeleteConfirmationModal();
+    }).catch(error => {
+        console.error('Error deleting student:', error);
+        if (error && error.error) {
+            alert(error.error);
+        }
+    });
+}
+
+function confirmDeleteStudent() {
+    studentsData.splice(currentDeleteIndex, 1);
+    renderStudents(currentPage);
+    closeDeleteConfirmationModal();
+}
+
+//antipattern
+function determineHtpMethod(operation) {
     let method = 'POST';
 
     switch (operation) {
         case 'add':
-            // URL remains the same, method is POST
             break;
         case 'edit':
-            url += `/${student.id}`; // Adjusted for PUT request
             method = 'PUT';
             break;
         case 'delete':
-            url += `/${student.id}`; // Adjusted for DELETE request
             method = 'DELETE';
             break;
         default:
             throw new Error('Invalid operation');
     }
+    return method;
+}
+
+//file with 3 functions:
+
+// postStudent
+// getStudent
+// deleteStudent
+//
+//
+// SEPARATE http calls
+
+// тут єдина функція, яка напряму взаємодіє з сервером
+function sendStudentDataToServer(student, operation) {
+    console.log('Operation:', operation);
+    let url = 'http://localhost:8080/api/v1/student';
+    let method = determineHtpMethod(operation);
 
     const data = operation !== 'delete' ? JSON.stringify({
-        Id: (student.id).toString(),
-        Group: student.group,
-        Name: student.name,
-        Gender: student.gender,
-        Birthday: student.birthday,
-        Status: student.status
-    }) : null;
+        id: student.id,
+        group: student.group,
+        name: student.name,
+        gender: student.gender,
+        birthday: student.birthday
+        // status: student.status
+    }) : JSON.stringify({id: student.id});
 
     console.log(data);
-
 
     return fetch(url, {
         method: method,
@@ -215,103 +346,32 @@ function sendStudentDataToServer(student, operation) {
     });
 }
 
-// Function to open the 'Add Student' modal
-function OpenAddStudentModal() {
-    const tempStudentId = generateStudentId();
-    $('#add-studentId').val(tempStudentId);
+// ці функції відкривають/закривають модальні вікна
 
+function openAddStudentModal() {
     $('#addModal').show();
 }
 
-// Function to close the 'Add Student' modal
-function CloseAddStudentModal() {
+function closeAddStudentModal() {
     $('#addModal').hide();
 }
 
-// Function to delete a student
-function deleteStudent(index) {
-    currentDeleteIndex = index;
-    OpenDeleteConfirmationModal();
-}
-
-// Function to confirm the deletion of a student
-function confirmDeleteStudent() {
-    studentsData.splice(currentDeleteIndex, 1);
-    renderStudents(currentPage);
-    CloseDeleteConfirmationModal();
-}
-
-// Function to open the 'Delete Confirmation' modal
-function OpenDeleteConfirmationModal() {
-    $('#deleteModal').show();
-}
-
-// Function to close the 'Delete Confirmation' modal
-function CloseDeleteConfirmationModal() {
-    $('#deleteModal').hide();
-}
-
-// Function to edit a student
-function editStudent(index) {
-    currentEditIndex = index;
-    const student = studentsData[index];
-    $('#edit-studentId').val(student.id);
-
-    $('#edit-group').val(student.group);
-    const nameParts = student.name.split(' ');
-    $('#edit-fname').val(nameParts[0]);
-    $('#edit-lname').val(nameParts.slice(1).join(' '));
-    $('#edit-gender').val(student.gender);
-    $('#edit-bday').val(student.birthday);
-
-    OpenEditStudentModal();
-}
-
-// Function to open the 'Edit Student' modal
-function OpenEditStudentModal() {
+function openEditStudentModal() {
     $('#editModal').show();
 }
 
-// Function to close the 'Edit Student' modal
-function CloseEditStudentModal() {
+function closeEditStudentModal() {
     $('#editModal').hide();
 }
 
-// Function to update a student's information
-function updateStudent() {
-    const group = $('#edit-group').val();
-    const fname = $('#edit-fname').val();
-    const lname = $('#edit-lname').val();
-    const gender = $('#edit-gender').val();
-    const bday = $('#edit-bday').val();
-
-    const namePattern = /^[A-Z][a-z]+$/;
-    if (!fname.trim() || !namePattern.test(fname)) {
-        alert('First name must start with an uppercase letter and be followed by lowercase letters.');
-        return;
-    }
-    if (!lname.trim() || !namePattern.test(lname)) {
-        alert('Last name must start with an uppercase letter and be followed by lowercase letters.');
-        return;
-    }
-
-    if (!group || !gender || !bday) {
-        alert('Please fill in all fields.');
-        return;
-    }
-
-    studentsData[currentEditIndex] = {
-        group: group,
-        name: fname + ' ' + lname,
-        gender: gender,
-        birthday: bday,
-        status: "Active"
-    };
-    renderStudents(currentPage);
-    CloseEditStudentModal();
+function openDeleteConfirmationModal() {
+    $('#deleteModal').show();
 }
 
-// Function to navigate to the previous page
+function closeDeleteConfirmationModal() {
+    $('#deleteModal').hide();
+}
+
 function previousPage() {
     if (currentPage > 1) {
         currentPage--;
@@ -319,7 +379,6 @@ function previousPage() {
     }
 }
 
-// Function to navigate to the next page
 function nextPage() {
     const totalPages = Math.ceil(studentsData.length / studentsPerPage);
     if (currentPage < totalPages) {
@@ -328,7 +387,6 @@ function nextPage() {
     }
 }
 
-// Function to resize table headers based on window width
 function resizeTableHeaders() {
     if ($(window).width() < 600) {
         // Update table headers for small screens
