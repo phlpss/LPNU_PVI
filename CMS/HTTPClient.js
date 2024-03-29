@@ -1,9 +1,13 @@
+import {Student} from "./script.js";
+
 export let url = 'http://localhost:8080/api/v1/student';
 
 export function postStudent(student) {
     const data = JSON.stringify(student);
-    console.log(data);
 
+    console.log('Inside postStudent');
+    console.log(data);
+    console.log(student);
     return fetch(url, {
         method: 'POST',
         headers: {
@@ -76,6 +80,26 @@ export function delStudent(student) {
     }).then(data => {
         console.log('Success:', data);
         return data;
+    }).catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+        return Promise.reject(error);
+    });
+}
+
+export function getStudents(){
+    return fetch(url, {
+        method: 'GET'
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.json().then(errorResponse => {
+                return Promise.reject(errorResponse);
+            });
+        }
+    }).then(data => {
+        console.log('Success:', data);
+        return data.map(item => new Student(item.id, item.group, item.name, item.gender, item.birthday, item.status));
     }).catch(error => {
         console.error('There has been a problem with your fetch operation:', error);
         return Promise.reject(error);

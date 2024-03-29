@@ -6,11 +6,11 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
-let studentsData = [];
 class Student {
-    //static idCounter = 0;
-    constructor(id, group, name, gender, birthday, status = "Active") {
-        this.id = id;
+    static idCounter = 0;
+
+    constructor(group, name, gender, birthday, status = "Active") {
+        this.id = ++Student.idCounter;
         this.group = group;
         this.name = name;
         this.gender = gender;
@@ -19,8 +19,13 @@ class Student {
     }
 }
 
+let studentsData = [
+    new Student("PZ-22", "Katya Hilfanova", "Female", "2005-01-12"),
+    new Student("PZ-28", "Olia Hnatetska", "Female", "2000-02-02", "Inactive"),
+];
+
 function validateStudentData(student) {
-    const { group, name, gender, birthday } = student;
+    const {group, name, gender, birthday} = student;
 
     // Checking for presence of required fields
     if (!group || !name || !gender || !birthday) {
@@ -40,29 +45,28 @@ function validateStudentData(student) {
 app.post('/api/v1/student', (req, res) => {
     const validationError = validateStudentData(req.body);
     if (validationError != null) {
-        return res.status(400).json({ error: validationError });
+        return res.status(400).json({error: validationError});
     }
 
-    const { group, name, gender, birthday } = req.body;
-    let id = studentsData.length > 0 ? studentsData[studentsData.length - 1].id + 1 : 1;
-    let newStudent = new Student(id, group, name, gender, birthday);
+    const {group, name, gender, birthday} = req.body;
+    let newStudent = new Student(group, name, gender, birthday);
     studentsData.push(newStudent);
 
     console.log('New student added:', newStudent);
-    res.status(200).json({ message: "Student added successfully", student: newStudent });
+    res.status(200).json({message: "Student added successfully", student: newStudent});
 });
 
 app.put('/api/v1/student', (req, res) => {
-    const { id } = req.body;
+    const {id} = req.body;
     const studentIndex = studentsData.findIndex(student => student.id === id);
 
     if (studentIndex === -1) {
-        return res.status(404).json({ error: "server: Student not found" });
+        return res.status(404).json({error: "server: Student not found"});
     }
 
     const validationError = validateStudentData(req.body);
     if (validationError) {
-        return res.status(400).json({ error: validationError });
+        return res.status(400).json({error: validationError});
     }
 
     // Update student details
@@ -76,31 +80,33 @@ app.put('/api/v1/student', (req, res) => {
     studentsData[studentIndex] = student;
 
     console.log('Student edited:', student);
-    res.status(200).json({ message: "Student edited successfully", student: student });
+    res.status(200).json({message: "Student edited successfully", student: student});
 });
 
 
 app.delete('/api/v1/student', (req, res) => {
-    const { id } = req.body;
+    const {id} = req.body;
     const studentIndex = studentsData.findIndex(student => student.id === id);
 
     if (studentIndex === -1) {
-        return res.status(404).json({ error: "server: Student not found" });
+        return res.status(404).json({error: "server: Student not found"});
     }
 
+    studentsData.splice(studentIndex, 1);
+
     // Remove the student from the array
-    res.status(200).json({ message: "Student deleted successfully" });
+    res.status(200).json({message: "Student deleted successfully"});
 });
 
 app.get('/api/v1/student/:id', (req, res) => {
     let studentFound = studentsData.find(student => student.id === req.params.id);
     if (!studentFound) {
-        return res.status(404).json({ error: "Student not found" });
+        return res.status(404).json({error: "Student not found"});
     }
     return res.status(200).json(studentFound);
 });
 
-app.get('/api/v1/students', (req, res) => {
+app.get('/api/v1/student', (req, res) => {
     return res.status(200).json(studentsData);
 });
 

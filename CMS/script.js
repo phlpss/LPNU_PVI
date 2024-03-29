@@ -1,9 +1,8 @@
-import {postStudent} from "./HTTPClient.js";
-import {putStudent} from "./HTTPClient.js";
-import {delStudent} from "./HTTPClient.js";
+import {delStudent, getStudents, postStudent, putStudent} from "./HTTPClient.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
+let currentStudentId = 1;
 
 $(function () {
     renderStudents(currentPage);
@@ -11,19 +10,19 @@ $(function () {
     $('#dashboardTab').click(function (e) {
         openTab(e, 'Dashboard');
     });
+
     $('#studentsTab').click(function (e) {
         openTab(e, 'Students');
     });
+
     $('#tasksTab').click(function (e) {
         openTab(e, 'Tasks');
     });
 
-    // Modal Close Event Listeners
     $('.modal .cancelStudentBt').click(function () {
         $(this).closest('.modal').hide();
     });
 
-    // Modal Background Click Event Listeners
     $(window).click(function (e) {
         if ($(e.target).hasClass('modal')) {
             $(e.target).hide();
@@ -33,30 +32,41 @@ $(function () {
     $('#addStudentButton').click(function () {
         $('#addModal').show();
     });
+
     $('#createStudentButton').click(createStudent);
+
     $('#updateStudentButton').click(function () {
-        const studentId = 1;    /////// get student id correctly
-        if (studentId) {
-            updateStudent(studentId);
+        if (currentStudentId) {
+            updateStudent(currentStudentId);
         } else {
             alert("No student selected for editing");
         }
     });
+
     $('#confirmDeleteStudent').click(function () {
-        deleteStudent(1);
+        if (currentStudentId) {
+            deleteStudent(currentStudentId);
+        } else {
+            alert("No student selected for deleting");
+        }
     });
+
     $('#closeAddStudentModal').click(function () {
         $('#addModal').hide();
     })
+
     $('#openEditStudentModal').click(function () {
         $('#editModal').show();
     })
+
     $('#closeEditStudentModal').click(function () {
         $('#editModal').hide();
     })
+
     $('#openDeleteConfirmationModal').click(function () {
         $('#deleteModal').show();
     })
+
     $('#closeDeleteConfirmationModal').click(function () {
         $('#deleteModal').hide();
     })
@@ -67,6 +77,7 @@ $(function () {
             renderStudents(currentPage);
         }
     })
+
     $('#nextPage').click(function () {
         const totalPages = Math.ceil(studentsData.length / studentsPerPage);
         if (currentPage < totalPages) {
@@ -84,23 +95,20 @@ $(function () {
     resizeTableHeaders();
 });
 
-class Student {
-    static idCounter = 0;
+let studentsData = [
+];
 
-    constructor(group, name, gender, birthday) {
-        this.id = Student.idCounter++;
-        this.group = group;
+export class Student {
+
+    constructor(id, group, name, gender, birthday, status) {
+        this.id = id
         this.name = name;
         this.gender = gender;
+        this.group = group;
         this.birthday = birthday;
-        this.status = "Active";
+        this.status = status;
     }
 }
-
-const studentsData = [
-    new Student("PZ-22", "Katya Hilfanova", "Female", "2005-01-12"),
-    new Student("PZ-28", "Olia Hnatetska", "Female", "2000-02-02", "Inactive"),
-];
 
 function openTab(evt, tabName) {
     $(".tabcontent").hide();
@@ -109,15 +117,16 @@ function openTab(evt, tabName) {
     $(evt.currentTarget).addClass("active");
 }
 
-function renderStudents(page) {
+async function renderStudents(page) {
     const startIndex = (page - 1) * studentsPerPage;
     const endIndex = startIndex + studentsPerPage;
-    const students = studentsData.slice(startIndex, endIndex);
+    studentsData = await getStudents()
+    console.log(studentsData)
 
     const $tableBody = $("#studentsTableBody");
     $tableBody.empty();
 
-    $.each(students, function (index, student) {
+    $.each(studentsData, function (index, student) {
         const $row = $('<tr></tr>');
         $row.append($('<td></td>').html('<input type="checkbox">'));
         $row.append($('<td></td>').text(student.group));
@@ -129,22 +138,24 @@ function renderStudents(page) {
         const $statusIndicator = $('<span></span>').addClass(statusClass).attr('title', student.status);
         $row.append($('<td></td>').append($statusIndicator));
 
+        let studentIndex = index + startIndex;
         const $deleteButton = $('<button></button>')
             .html('<img src="assets/delete_icon.svg" alt="Delete Icon" style="width: 16px; height: 16px;">')
             .addClass("delete-button")
+            .data('id', studentsData[studentIndex].id) // Storing student ID in data attribute
             .click(function () {
                 // Retrieve the whole student object
-                const student = studentsData[index + startIndex];
+                const student = studentsData[studentIndex];
+                currentStudentId = $(this).data('id');
                 $('#deleteModal').show();
-                // deleteStudent(student.id);
             });
 
         const $editButton = $('<button></button>')
             .html('<img src="assets/edit_icon.svg" alt="Edit Icon" style="width: 16px; height: 16px;">')
             .addClass("edit-button")
             .click(function () {
-                const student = studentsData[index + startIndex];
-                editStudent(student.id);
+                const student = studentsData[studentIndex];
+                editStudent(student);
             });
 
         const $spacer = $('<span></span>').css('marginRight', '5px');
@@ -170,6 +181,12 @@ function createStudent() {
     const gender = $('#gender').val();
     const bday = $('#bday').val();
 
+    console.log(group);
+    console.log(fname);
+    console.log(lname);
+    console.log(gender);
+    console.log(bday);
+
     // if (!group || !fname || !lname || !gender || !bday) {
     //     alert('Please fill in all fields.');
     //     return;
@@ -190,7 +207,7 @@ function createStudent() {
 }
 
 function addStudent(group, name, gender, birthday) {
-    const newStudent = new Student(group, name, gender, birthday);
+    const newStudent = new Student(null,group, name, gender, birthday, 'Active');
 
     postStudent(newStudent).then(data => {
         studentsData.push(newStudent);
@@ -241,22 +258,23 @@ function updateStudent(studentId) {
     });
 }
 
-function editStudent(studentId) {
-    const studentToEdit = studentsData.find(s => s.id === studentId);
-    if (!studentToEdit) {
+function editStudent(student) {
+    // const studentToEdit = studentsData.find(s => s.id === studentId);
+
+    if (!student) {
         console.error('editStudent: Student not found');
         return;
     }
 
-    $('#edit-studentId').val(studentToEdit.id);
-    $('#edit-group').val(studentToEdit.group);
-    const nameParts = studentToEdit.name.split(' ');
+    $('#edit-studentId').val(student.id);
+    $('#edit-group').val(student.group);
+    const nameParts = student.name.split(' ');
     $('#edit-fname').val(nameParts[0]);
     $('#edit-lname').val(nameParts.slice(1).join(' '));
-    $('#edit-gender').val(studentToEdit.gender);
-    $('#edit-bday').val(studentToEdit.birthday);
+    $('#edit-gender').val(student.gender);
+    $('#edit-bday').val(student.birthday);
 
-    // openEditStudentModal();
+    currentStudentId = student.id;
     $('#editModal').show();
 }
 
