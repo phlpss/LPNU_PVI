@@ -1,8 +1,3 @@
-// createStudent
-// editStudent
-// deleteStudent
-
-
 export let url = 'http://localhost:8080/api/v1/student';
 
 export function postStudent(student) {

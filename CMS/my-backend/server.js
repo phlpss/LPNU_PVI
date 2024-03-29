@@ -47,6 +47,8 @@ app.post('/api/v1/student', (req, res) => {
     let id = studentsData.length > 0 ? studentsData[studentsData.length - 1].id + 1 : 1;
     let newStudent = new Student(id, group, name, gender, birthday);
     studentsData.push(newStudent);
+
+    console.log('New student added:', newStudent);
     res.status(200).json({ message: "Student added successfully", student: newStudent });
 });
 
@@ -55,7 +57,7 @@ app.put('/api/v1/student', (req, res) => {
     const studentIndex = studentsData.findIndex(student => student.id === id);
 
     if (studentIndex === -1) {
-        return res.status(404).json({ error: "Student not found" });
+        return res.status(404).json({ error: "server: Student not found" });
     }
 
     const validationError = validateStudentData(req.body);
@@ -73,6 +75,7 @@ app.put('/api/v1/student', (req, res) => {
 
     studentsData[studentIndex] = student;
 
+    console.log('Student edited:', student);
     res.status(200).json({ message: "Student edited successfully", student: student });
 });
 
@@ -82,11 +85,10 @@ app.delete('/api/v1/student', (req, res) => {
     const studentIndex = studentsData.findIndex(student => student.id === id);
 
     if (studentIndex === -1) {
-        return res.status(404).json({ error: "Student not found" });
+        return res.status(404).json({ error: "server: Student not found" });
     }
 
     // Remove the student from the array
-    studentsData.splice(studentIndex, 1);
     res.status(200).json({ message: "Student deleted successfully" });
 });
 
