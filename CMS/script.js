@@ -121,7 +121,6 @@ async function renderStudents(page) {
     const startIndex = (page - 1) * studentsPerPage;
     const endIndex = startIndex + studentsPerPage;
     studentsData = await getStudents()
-    console.log(studentsData)
 
     const $tableBody = $("#studentsTableBody");
     $tableBody.empty();
@@ -180,12 +179,6 @@ function createStudent() {
     const lname = $('#lname').val();
     const gender = $('#gender').val();
     const bday = $('#bday').val();
-
-    console.log(group);
-    console.log(fname);
-    console.log(lname);
-    console.log(gender);
-    console.log(bday);
 
     // if (!group || !fname || !lname || !gender || !bday) {
     //     alert('Please fill in all fields.');
