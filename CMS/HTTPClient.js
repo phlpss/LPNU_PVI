@@ -58,7 +58,6 @@ export function putStudent(student) {
     });
 }
 
-
 export function delStudent(student) {
     const data = JSON.stringify({id: student.id});
     console.log(data);
@@ -105,3 +104,7 @@ export function getStudents(){
         return Promise.reject(error);
     });
 }
+
+
+// що таке (не)реляційна база даних
+// доступ до БД через PWO

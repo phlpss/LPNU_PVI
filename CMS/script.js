@@ -99,7 +99,6 @@ let studentsData = [
 ];
 
 export class Student {
-
     constructor(id, group, name, gender, birthday, status) {
         this.id = id
         this.name = name;
@@ -180,20 +179,20 @@ function createStudent() {
     const gender = $('#gender').val();
     const bday = $('#bday').val();
 
-    // if (!group || !fname || !lname || !gender || !bday) {
-    //     alert('Please fill in all fields.');
-    //     return;
-    // }
-    //
-    // const namePattern = /^[A-Z][a-z]+$/;
-    // if (!fname.trim() || !namePattern.test(fname)) {
-    //     alert('First name must start with an uppercase letter and be followed by lowercase letters.');
-    //     return;
-    // }
-    // if (!lname.trim() || !namePattern.test(lname)) {
-    //     alert('Last name must start with an uppercase letter and be followed by lowercase letters.');
-    //     return;
-    // }
+    if (!group || !fname || !lname || !gender || !bday) {
+        alert('Please fill in all fields.');
+        return;
+    }
+
+    const namePattern = /^[A-Z][a-z]+$/;
+    if (!fname.trim() || !namePattern.test(fname)) {
+        alert('First name must start with an uppercase letter and be followed by lowercase letters.');
+        return;
+    }
+    if (!lname.trim() || !namePattern.test(lname)) {
+        alert('Last name must start with an uppercase letter and be followed by lowercase letters.');
+        return;
+    }
 
     addStudent(group, fname + ' ' + lname, gender, bday);
     $('#addModal').hide();
@@ -220,15 +219,15 @@ function updateStudent(studentId) {
     const gender = $('#edit-gender').val();
     const bday = $('#edit-bday').val();
 
-    // const namePattern = /^[A-Z][a-z]+$/;
-    // if (!fname.trim() || !namePattern.test(fname) || !lname.trim() || !namePattern.test(lname)) {
-    //     alert('Names must start with an uppercase letter and be followed by lowercase letters.');
-    //     return;
-    // }
-    // if (!group || !gender || !bday) {
-    //     alert('Please fill in all fields.');
-    //     return;
-    // }
+    const namePattern = /^[A-Z][a-z]+$/;
+    if (!fname.trim() || !namePattern.test(fname) || !lname.trim() || !namePattern.test(lname)) {
+        alert('Names must start with an uppercase letter and be followed by lowercase letters.');
+        return;
+    }
+    if (!group || !gender || !bday) {
+        alert('Please fill in all fields.');
+        return;
+    }
 
     const updatedStudent = {
         id: studentId,

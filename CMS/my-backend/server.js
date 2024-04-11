@@ -1,28 +1,21 @@
 const express = require('express');
-const app = express();
-const port = 8080;
+const mysql = require('mysql2/promise');
 const cors = require('cors');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Database connection
+const dbConfig = {
+    host: 'localhost',
+    user: 'Katya',
+    password: 'Rfv11tgb22yhn33',
+    database: 'student_db'
+};
+const pool = mysql.createPool(dbConfig);
 
 app.use(cors());
 app.use(express.json());
-
-class Student {
-    static idCounter = 0;
-
-    constructor(group, name, gender, birthday, status = "Active") {
-        this.id = ++Student.idCounter;
-        this.group = group;
-        this.name = name;
-        this.gender = gender;
-        this.birthday = birthday;
-        this.status = status;
-    }
-}
-
-let studentsData = [
-    new Student("PZ-22", "Katya Hilfanova", "Female", "2005-01-12"),
-    new Student("PZ-28", "Olia Hnatetska", "Female", "2000-02-02", "Inactive"),
-];
 
 function validateStudentData(student) {
     const {group, name, gender, birthday} = student;
@@ -36,78 +29,99 @@ function validateStudentData(student) {
     const namePattern = /^[A-Z][a-z]+$/;
     const nameParts = name.split(' ');
     if (!nameParts.every(name => namePattern.test(name))) {
-        return 'name must start with an uppercase letter and be followed by lowercase letters.';
+        return 'Name must start with an uppercase letter and be followed by lowercase letters.';
     }
 
     return null;
 }
 
-app.post('/api/v1/student', (req, res) => {
-    const validationError = validateStudentData(req.body);
-    if (validationError != null) {
-        return res.status(400).json({error: validationError});
-    }
-
-    const {group, name, gender, birthday} = req.body;
-    let newStudent = new Student(group, name, gender, birthday);
-    studentsData.push(newStudent);
-
-    console.log('New student added:', newStudent);
-    res.status(200).json({message: "Student added successfully", student: newStudent});
-});
-
-app.put('/api/v1/student', (req, res) => {
-    const {id} = req.body;
-    const studentIndex = studentsData.findIndex(student => student.id === id);
-
-    if (studentIndex === -1) {
-        return res.status(404).json({error: "server: Student not found"});
-    }
-
+app.post('/api/v1/student', async (req, res) => {
     const validationError = validateStudentData(req.body);
     if (validationError) {
         return res.status(400).json({error: validationError});
     }
 
-    // Update student details
-    let student = studentsData[studentIndex];
-    student.group = req.body.group || student.group;
-    student.name = req.body.name || student.name;
-    student.gender = req.body.gender || student.gender;
-    student.birthday = req.body.birthday || student.birthday;
-    student.status = req.body.status || student.status;
-
-    studentsData[studentIndex] = student;
-
-    console.log('Student edited:', student);
-    res.status(200).json({message: "Student edited successfully", student: student});
+    const {group, name, gender, birthday} = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO students (`group`, name, gender, birthday) VALUES (?, ?, ?, ?)',
+            [group, name, gender, birthday]
+        );
+        return res.status(201).json({message: "Student added successfully", studentId: result.insertId});
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({error: "Internal server error"});
+    }
 });
 
+app.put('/api/v1/student', async (req, res) => {
+    const {id, group, name, gender, birthday, status} = req.body;
 
-app.delete('/api/v1/student', (req, res) => {
+    // Validate student data
+    const validationError = validateStudentData(req.body);
+    if (validationError) {
+        return res.status(400).json({error: validationError});
+    }
+
+    try {
+        const [check] = await pool.query('SELECT * FROM students WHERE id = ?', [id]);
+        if (check.length === 0) { // Ensure we're checking the length of the array
+            return res.status(404).json({error: "Student not found"});
+        }
+
+        const [updateResult] = await pool.query('UPDATE students SET `group` = ?, name = ?, gender = ?, birthday = ?, status = ? WHERE id = ?', [group, name, gender, birthday, status, id]);
+
+        console.log(updateResult);
+        res.status(200).json({message: "Student updated successfully"});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
+    }
+});
+
+app.delete('/api/v1/student', async (req, res) => {
     const {id} = req.body;
-    const studentIndex = studentsData.findIndex(student => student.id === id);
 
-    if (studentIndex === -1) {
-        return res.status(404).json({error: "server: Student not found"});
+    try {
+        const [result] = await pool.query('DELETE FROM students WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({error: "Student not found"});
+        }
+
+        res.status(200).json({message: "Student deleted successfully"});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
     }
-
-    studentsData.splice(studentIndex, 1);
-
-    // Remove the student from the array
-    res.status(200).json({message: "Student deleted successfully"});
 });
 
-app.get('/api/v1/student/:id', (req, res) => {
-    let studentFound = studentsData.find(student => student.id === req.params.id);
-    if (!studentFound) {
-        return res.status(404).json({error: "Student not found"});
+app.get('/api/v1/student/:id', async (req, res) => {
+    const studentId = parseInt(req.params.id, 10); // Convert the id from string to integer
+    if (isNaN(studentId)) {
+        return res.status(400).json({error: "Invalid student ID format"});
     }
-    return res.status(200).json(studentFound);
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM students WHERE id = ?', [studentId]);
+        if (rows.length === 0) {
+            return res.status(404).json({error: "Student not found"});
+        }
+
+        res.status(200).json(rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
+    }
 });
 
-app.get('/api/v1/student', (req, res) => {
-    return res.status(200).json(studentsData);
+app.get('/api/v1/student', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM students');
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal server error"});
+    }
 });
 
 app.listen(port, () => {
