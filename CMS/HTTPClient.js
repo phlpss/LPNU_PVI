@@ -1,6 +1,6 @@
 import {Student} from "./script.js";
 
-export let url = 'http://localhost:8080/api/v1/student';
+export let url = 'http://localhost:3000/api/v1/student';
 
 export function postStudent(student) {
     const data = JSON.stringify(student);

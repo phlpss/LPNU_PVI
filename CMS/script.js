@@ -126,11 +126,16 @@ async function renderStudents(page) {
 
     $.each(studentsData, function (index, student) {
         const $row = $('<tr></tr>');
+        const birthday = new Date(student.birthday);
+        const formattedBirthday = birthday.toLocaleDateString('en-US', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        });
+
         $row.append($('<td></td>').html('<input type="checkbox">'));
         $row.append($('<td></td>').text(student.group));
         $row.append($('<td></td>').text(student.name));
         $row.append($('<td></td>').text(student.gender));
-        $row.append($('<td></td>').text(student.birthday));
+        $row.append($('<td></td>').text(formattedBirthday));
 
         const statusClass = student.status === "Active" ? "status-active" : "status-inactive";
         const $statusIndicator = $('<span></span>').addClass(statusClass).attr('title', student.status);
@@ -295,13 +300,17 @@ function deleteStudent(studentId) {
 function resizeTableHeaders() {
     if ($(window).width() < 600) {
         // Update table headers for small screens
-        $('#studentsTable th:nth-child(6)').text('S');
         $('#studentsTable th:nth-child(2)').text('G');
-        $('#studentsTable th:nth-child(4)').text('B');
+        $('#studentsTable th:nth-child(3)').text('N');
+        $('#studentsTable th:nth-child(4)').text('G');
+        $('#studentsTable th:nth-child(5)').text('B');
+        $('#studentsTable th:nth-child(6)').text('S');
     } else {
         // Reset table headers for larger screens
-        $('#studentsTable th:nth-child(6)').text('Status');
         $('#studentsTable th:nth-child(2)').text('Group');
-        $('#studentsTable th:nth-child(4)').text('Birthday');
+        $('#studentsTable th:nth-child(3)').text('Name');
+        $('#studentsTable th:nth-child(4)').text('Gender');
+        $('#studentsTable th:nth-child(5)').text('Birthday');
+        $('#studentsTable th:nth-child(6)').text('Status');
     }
 }

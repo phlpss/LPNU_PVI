@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+
 // Database connection
 const dbConfig = {
     host: 'localhost',
@@ -41,7 +42,10 @@ app.post('/api/v1/student', async (req, res) => {
         return res.status(400).json({error: validationError});
     }
 
-    const {group, name, gender, birthday} = req.body;
+    let {group, name, gender, birthday} = req.body;
+
+    birthday = new Date(birthday).toISOString().split('T')[0];
+
     try {
         const [result] = await pool.query(
             'INSERT INTO students (`group`, name, gender, birthday) VALUES (?, ?, ?, ?)',
@@ -63,13 +67,19 @@ app.put('/api/v1/student', async (req, res) => {
         return res.status(400).json({error: validationError});
     }
 
+    // Convert the birthday to UTC to avoid timezone issues
+    const birthdayUTC = new Date(birthday).toISOString().split('T')[0];
+
     try {
         const [check] = await pool.query('SELECT * FROM students WHERE id = ?', [id]);
-        if (check.length === 0) { // Ensure we're checking the length of the array
+        if (check.length === 0) {
             return res.status(404).json({error: "Student not found"});
         }
 
-        const [updateResult] = await pool.query('UPDATE students SET `group` = ?, name = ?, gender = ?, birthday = ?, status = ? WHERE id = ?', [group, name, gender, birthday, status, id]);
+        const [updateResult] = await pool.query(
+            'UPDATE students SET `group` = ?, name = ?, gender = ?, birthday = ?, status = ? WHERE id = ?',
+            [group, name, gender, birthdayUTC, status, id]
+        );
 
         console.log(updateResult);
         res.status(200).json({message: "Student updated successfully"});
@@ -78,6 +88,33 @@ app.put('/api/v1/student', async (req, res) => {
         res.status(500).json({error: "Internal server error"});
     }
 });
+
+
+//
+// app.put('/api/v1/student', async (req, res) => {
+//     const {id, group, name, gender, birthday, status} = req.body;
+//
+//     // Validate student data
+//     const validationError = validateStudentData(req.body);
+//     if (validationError) {
+//         return res.status(400).json({error: validationError});
+//     }
+//
+//     try {
+//         const [check] = await pool.query('SELECT * FROM students WHERE id = ?', [id]);
+//         if (check.length === 0) { // Ensure we're checking the length of the array
+//             return res.status(404).json({error: "Student not found"});
+//         }
+//
+//         const [updateResult] = await pool.query('UPDATE students SET `group` = ?, name = ?, gender = ?, birthday = ?, status = ? WHERE id = ?', [group, name, gender, birthday, status, id]);
+//
+//         console.log(updateResult);
+//         res.status(200).json({message: "Student updated successfully"});
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({error: "Internal server error"});
+//     }
+// });
 
 app.delete('/api/v1/student', async (req, res) => {
     const {id} = req.body;
