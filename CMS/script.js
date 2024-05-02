@@ -19,6 +19,10 @@ $(function () {
         openTab(e, 'Tasks');
     });
 
+    $('#notificationBell').click(function (e) {
+        openTab(e, 'Messages');
+    });
+
     $('.modal .cancelStudentBt').click(function () {
         $(this).closest('.modal').hide();
     });
