@@ -1,19 +1,66 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
 const cors = require('cors');
+const http = require('http');
+const { MongoClient } = require('mongodb');
+const mysql = require('mysql2/promise');
+const socketIo = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 const port = process.env.PORT || 3000;
 
-
-// Database connection
+// MySQL Database connection
 const dbConfig = {
     host: 'localhost',
     user: 'Katya',
     password: 'Rfv11tgb22yhn33',
     database: 'student_db'
 };
+
 const pool = mysql.createPool(dbConfig);
+
+// MongoDB connection
+const mongoUrl = 'mongodb://localhost:27017';
+const mongoDbName = 'chat_db';
+const mongoClient = new MongoClient(mongoUrl);
+
+async function connectToMongoDB() {
+    await mongoClient.connect();
+    console.log("Connected to MongoDB");
+    return mongoClient.db(mongoDbName);
+}
+
+const mongoDb = connectToMongoDB();
+
+io.on('connection', (socket) => {
+    console.log('New client connected');
+
+    socket.on('input', async (data) => {
+        try {
+            if (!data.name || !data.message) {
+                throw new Error("Name and message cannot be empty");
+            }
+            const { name, message } = data;
+            const chatCollection = (await mongoDb).collection('chat_messages');
+            await chatCollection.insertOne({ name, message });
+            io.emit('output', [data]); // Broadcasting the message to all clients
+        } catch (err) {
+            console.error('MongoDB error: ', err);
+            socket.emit('status', 'Error sending message');
+        }
+    });
+
+    socket.on('clear', async () => {
+        try {
+            const chatCollection = (await mongoDb).collection('chat_messages');
+            await chatCollection.deleteMany({});
+            socket.emit('cleared');
+        } catch (err) {
+            console.error('MongoDB error: ', err);
+        }
+    });
+});
 
 app.use(cors());
 app.use(express.json());
@@ -133,6 +180,7 @@ app.get('/api/v1/student', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
+
+server.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
