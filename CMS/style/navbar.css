@@ -1,11 +1,12 @@
 /*NavBar*/
 .navbar {
+    display: none;
     width: auto;
     background: linear-gradient(0.3turn,
     rgba(0, 0, 0, 0.1), rgba(1, 1, 1, 0.1), rgba(2, 2, 2, 0.15), rgba(8, 26, 39, 0.6));
 
     z-index: 1000;
-    display: flex;
+    /*display: flex;*/
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;

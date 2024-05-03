@@ -17,7 +17,7 @@
     <!--    <link rel="manifest" href="manifest.json">-->
 
     <script src="script.js" type="module" defer></script>
-    <script src="HTTPClient.js" type="module" defer></script>
+    <script src="student-client.js" type="module" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -26,8 +26,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 </head>
 <body>
+
+<div class="login-page" id="loginPage">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form id="loginForm">
+                <label for="firstName"></label><input type="text" id="firstName" name="fname" class="form-control" placeholder="Enter first name"><br><br>
+                <input type="text" id="lastName" name="lname" class="form-control" placeholder="Enter last name"><br><br>
+                <button type="button" class="button" id="loginButton">Sigh in</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!--NavBar-->
-<nav class="navbar">
+<nav class="navbar" id="navbar">
     <h2>CMS</h2>
     <ul>
         <li class='dropdown' id="notificationsDropdown">
@@ -43,18 +56,18 @@
         </li>
 
         <li class='dropdown'><a href="#">
-            <img src='assets/user_icon_white.svg' alt='user' height='26' width='26'> Katya Filip
+            <img src='assets/user_icon_white.svg' alt='user' height='26' width='26'> <span id="userName">Default User</span>
         </a>
             <div class='dropdown-content'>
                 <a href='https://www.linkedin.com/in/katya-philip-488ba4244/'>Profile</a>
-                <a href='#'>Logout</a>
+                <button class="button" id="logoutButton">Log out</button>
             </div>
         </li>
     </ul>
 </nav>
 
 <!--VerticalTabMenu-->
-<div class="tabandcontent">
+<div class="tabandcontent" id="tabandcontent">
     <aside class="tab">
         <button class="tablinks" id="dashboardTab">Dashboard</button>
         <button class="tablinks" id="studentsTab">Students</button>
@@ -70,7 +83,6 @@
         <button id="addStudentButton"><img src='assets/add_user.svg' class="add" id="add" alt="Add User Icon"></button>
         <!--        <button onclick="openAddStudentModal()"><img src='assets/add_user.svg' class="add" id="add" alt="Add User Icon"></button>-->
 
-        <!-- The Add Modal -->
         <div id="addModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -132,7 +144,6 @@
             </div>
         </div>
 
-        <!-- The Edit Modal -->
         <div id="editModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -190,7 +201,6 @@
             </div>
         </div>
 
-        <!-- The Delete Confirmation Modal -->
         <div id="deleteModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -272,110 +282,109 @@
         </div>
     </section>
 
-<!--    <section id="Messages" class="tabcontent">-->
-<!--        <div class="container-fluid h-100">-->
-<!--            <div class="row-h-100">-->
-<!--                &lt;!&ndash; Chat room list column &ndash;&gt;-->
-<!--                <div class="col-4">-->
-<!--                    <div class="chatroom-header">-->
-<!--                        <h4> Chat room </h4>-->
-<!--                        <button class="btn btn-link">+ New chat room</button>-->
-<!--                    </div>-->
-<!--                    <div class="list-group">-->
-<!--                        <a href="#" class="list-group-item list-group-item-action active">Admin</a>-->
-<!--                        <a href="#" class="list-group-item list-group-item-action">Ann Smith</a>-->
-<!--                        <a href="#" class="list-group-item list-group-item-action">John Bond</a>-->
-<!--                        <a href="#" class="list-group-item list-group-item-action">Ivan Stan</a>-->
-<!--                    </div>-->
-<!--                </div>-->
+    <section id="Messages" class="tabcontent">
+        <div class="container-fluid h-100">
+            <div class="row-h-100">
+                <!-- Chat room list column -->
+                <div class="col-4">
+                    <div class="chatroom-header">
+                        <h4> Chat room </h4>
+                        <button class="btn btn-link">+ New chat room</button>
+                    </div>
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action active">Admin</a>
+                        <a href="#" class="list-group-item list-group-item-action">Ann Smith</a>
+                        <a href="#" class="list-group-item list-group-item-action">John Bond</a>
+                        <a href="#" class="list-group-item list-group-item-action">Ivan Stan</a>
+                    </div>
+                </div>
 
-<!--                &lt;!&ndash; Chat room details column &ndash;&gt;-->
-<!--                <div class="col-8">-->
-<!--                    <div class="border-bottom pb-2 mb-2">-->
-<!--                        <h4>Chat room Admin</h4>-->
-<!--                        <div>Members</div>-->
-<!--                        <div>Messages</div>-->
-<!--                    </div>-->
-<!--                    <div class="overflow-auto" style="height:300px;">-->
-<!--                        &lt;!&ndash; Message content would go here &ndash;&gt;-->
-<!--                    </div>-->
-<!--                    <div class="new-message">-->
-<!--                        <label>-->
-<!--                            <textarea class="form-control mt-2" placeholder="Type a message..."></textarea>-->
-<!--                        </label>-->
-<!--                        <button id="sendButton"><img src='assets/send_icon.svg' class="sender"-->
-<!--                                                     alt="Send message button"></button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--&lt;!&ndash;        <script>&ndash;&gt;-->
-<!--&lt;!&ndash;            (function () {&ndash;&gt;-->
-<!--&lt;!&ndash;                const messages = document.querySelector('.overflow-auto'); // Where messages will be displayed&ndash;&gt;-->
-<!--&lt;!&ndash;                const textarea = document.querySelector('.new-message textarea'); // The textarea for new messages&ndash;&gt;-->
-<!--&lt;!&ndash;                const sendButton = document.getElementById('sendButton'); // The send button for messages&ndash;&gt;-->
+                <!-- Chat room details column -->
+                <div class="col-8">
+                    <div class="border-bottom pb-2 mb-2">
+                        <h4>Chat room Admin</h4>
+                        <div>Members</div>
+                        <div>Messages</div>
+                    </div>
+                    <div class="overflow-auto" style="height:300px;">
+                        <!-- Message content would go here -->
+                    </div>
+                    <div class="new-message">
+                        <label>
+                            <textarea class="form-control mt-2" placeholder="Type a message..."></textarea>
+                        </label>
+                        <button id="sendButton"><img src='assets/send_icon.svg' class="sender"
+                                                     alt="Send message button"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            (function () {
+                const messages = document.querySelector('.overflow-auto'); // Where messages will be displayed
+                const textarea = document.querySelector('.new-message textarea'); // The textarea for new messages
+                const sendButton = document.getElementById('sendButton'); // The send button for messages
 
-<!--&lt;!&ndash;                // Function to append messages to the display area&ndash;&gt;-->
-<!--&lt;!&ndash;                const appendMessage = (name, message) => {&ndash;&gt;-->
-<!--&lt;!&ndash;                    const messageDiv = document.createElement('div');&ndash;&gt;-->
-<!--&lt;!&ndash;                    messageDiv.setAttribute('class', 'chat-message');&ndash;&gt;-->
-<!--&lt;!&ndash;                    messageDiv.textContent = name + ": " + message;&ndash;&gt;-->
-<!--&lt;!&ndash;                    messages.appendChild(messageDiv);&ndash;&gt;-->
-<!--&lt;!&ndash;                    messages.scrollTop = messages.scrollHeight; // Scroll to the bottom&ndash;&gt;-->
-<!--&lt;!&ndash;                };&ndash;&gt;-->
+                // Function to append messages to the display area
+                const appendMessage = (name, message) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.setAttribute('class', 'chat-message');
+                    messageDiv.textContent = name + ": " + message;
+                    messages.appendChild(messageDiv);
+                    messages.scrollTop = messages.scrollHeight; // Scroll to the bottom
+                };
 
-<!--&lt;!&ndash;                // Connect to socket.io&ndash;&gt;-->
-<!--&lt;!&ndash;                const socket = io.connect('http://127.0.0.1:3000');&ndash;&gt;-->
+                // Connect to socket.io
+                const socket = io.connect('http://127.0.0.1:3000');
 
-<!--&lt;!&ndash;                // Check for connection&ndash;&gt;-->
-<!--&lt;!&ndash;                if (socket !== undefined) {&ndash;&gt;-->
-<!--&lt;!&ndash;                    console.log('Connected to socket...');&ndash;&gt;-->
+                // Check for connection
+                if (socket !== undefined) {
+                    console.log('Connected to socket...');
 
-<!--&lt;!&ndash;                    socket.on('output', function (data) {&ndash;&gt;-->
-<!--&lt;!&ndash;                        if (data.length) {&ndash;&gt;-->
-<!--&lt;!&ndash;                            data.forEach(msg => appendMessage(msg.name, msg.message));&ndash;&gt;-->
-<!--&lt;!&ndash;                        }&ndash;&gt;-->
-<!--&lt;!&ndash;                    });&ndash;&gt;-->
+                    socket.on('output', function (data) {
+                        if (data.length) {
+                            data.forEach(msg => appendMessage(msg.name, msg.message));
+                        }
+                    });
 
-<!--&lt;!&ndash;                    // Listen for the send button click event&ndash;&gt;-->
-<!--&lt;!&ndash;                    sendButton.addEventListener('click', function () {&ndash;&gt;-->
-<!--&lt;!&ndash;                        const name = 'Your Name Here'; // Replace with actual logic to retrieve user's name&ndash;&gt;-->
-<!--&lt;!&ndash;                        const message = textarea.value.trim();&ndash;&gt;-->
-<!--&lt;!&ndash;                        if(message) {&ndash;&gt;-->
-<!--&lt;!&ndash;                            socket.emit('input', {&ndash;&gt;-->
-<!--&lt;!&ndash;                                name: name,&ndash;&gt;-->
-<!--&lt;!&ndash;                                message: message&ndash;&gt;-->
-<!--&lt;!&ndash;                            });&ndash;&gt;-->
-<!--&lt;!&ndash;                            textarea.value = ''; // Clear the input field&ndash;&gt;-->
-<!--&lt;!&ndash;                        }&ndash;&gt;-->
-<!--&lt;!&ndash;                    });&ndash;&gt;-->
+                    // Listen for the send button click event
+                    sendButton.addEventListener('click', function () {
+                        const name = 'Your Name Here'; // Replace with actual logic to retrieve user's name
+                        const message = textarea.value.trim();
+                        if(message) {
+                            socket.emit('input', {
+                                name: name,
+                                message: message
+                            });
+                            textarea.value = ''; // Clear the input field
+                        }
+                    });
 
-<!--&lt;!&ndash;                    // Handle input&ndash;&gt;-->
-<!--&lt;!&ndash;                    textarea.addEventListener('keydown', function (event) {&ndash;&gt;-->
-<!--&lt;!&ndash;                        if (event.key === 'Enter' && !event.shiftKey) {&ndash;&gt;-->
-<!--&lt;!&ndash;                            event.preventDefault();&ndash;&gt;-->
-<!--&lt;!&ndash;                            sendButton.click();&ndash;&gt;-->
-<!--&lt;!&ndash;                        }&ndash;&gt;-->
-<!--&lt;!&ndash;                    });&ndash;&gt;-->
+                    // Handle input
+                    textarea.addEventListener('keydown', function (event) {
+                        if (event.key === 'Enter' && !event.shiftKey) {
+                            event.preventDefault();
+                            sendButton.click();
+                        }
+                    });
 
-<!--&lt;!&ndash;                    // Handling clear button functionality if needed&ndash;&gt;-->
-<!--&lt;!&ndash;                    // Note: Make sure you have a clear button defined in your HTML if you want to use this.&ndash;&gt;-->
-<!--&lt;!&ndash;                    /*&ndash;&gt;-->
-<!--&lt;!&ndash;                    const clearBtn = document.getElementById('clear');&ndash;&gt;-->
-<!--&lt;!&ndash;                    clearBtn.addEventListener('click', function () {&ndash;&gt;-->
-<!--&lt;!&ndash;                        socket.emit('clear');&ndash;&gt;-->
-<!--&lt;!&ndash;                        messages.innerHTML = ''; // Clear the messages display&ndash;&gt;-->
-<!--&lt;!&ndash;                    });&ndash;&gt;-->
+                    // Handling clear button functionality if needed
+                    // Note: Make sure you have a clear button defined in your HTML if you want to use this.
+                    /*
+                    const clearBtn = document.getElementById('clear');
+                    clearBtn.addEventListener('click', function () {
+                        socket.emit('clear');
+                        messages.innerHTML = ''; // Clear the messages display
+                    });
 
-<!--&lt;!&ndash;                    socket.on('cleared', function () {&ndash;&gt;-->
-<!--&lt;!&ndash;                        messages.innerHTML = ''; // Clear the messages display&ndash;&gt;-->
-<!--&lt;!&ndash;                    });&ndash;&gt;-->
-<!--&lt;!&ndash;                    */&ndash;&gt;-->
-<!--&lt;!&ndash;                }&ndash;&gt;-->
-<!--&lt;!&ndash;            })();&ndash;&gt;-->
-<!--&lt;!&ndash;        </script>&ndash;&gt;-->
-<!--    </section>-->
-
+                    socket.on('cleared', function () {
+                        messages.innerHTML = ''; // Clear the messages display
+                    });
+                    */
+                }
+            })();
+        </script>
+    </section>
 </div>
 </body>
 </html>

@@ -1,6 +1,7 @@
 .tabandcontent {
+    display: none;
     color: #dddddd;
-    display: flex;
+    /*display: flex;*/
     flex-flow: row wrap;
     margin-top: 10px;
 }

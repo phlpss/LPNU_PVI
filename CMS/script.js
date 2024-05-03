@@ -1,4 +1,4 @@
-import {delStudent, getStudents, postStudent, putStudent} from "./HTTPClient.js";
+import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
@@ -318,3 +318,33 @@ function resizeTableHeaders() {
         $('#studentsTable th:nth-child(6)').text('Status');
     }
 }
+
+document.getElementById("loginButton").addEventListener("click", function() {
+    // Simulated authentication process
+    let userFirstName = document.getElementById("firstName").value;
+    let userLastName = document.getElementById("lastName").value;
+    if(!userFirstName || !userLastName) {
+        userFirstName = "Default"
+        userLastName = "User"
+    }
+
+    // put user to database
+
+    // Hide login page and show content page
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("tabandcontent").style.display = "flex";
+    document.getElementById("navbar").style.display = "flex";
+
+    // Set username in navbar
+    document.getElementById("userName").textContent = userFirstName + " " + userLastName;
+
+    // Add logout functionality
+    document.getElementById("logoutButton").addEventListener("click", function() {
+        document.getElementById("tabandcontent").style.display = "none";
+        document.getElementById("navbar").style.display = "none";
+        document.getElementById("loginPage").style.display = "flex";
+        document.getElementById("firstName").value = "";
+        document.getElementById("lastName").value = "";
+        document.getElementById("userName").textContent = "Katya Filip";
+    });
+});

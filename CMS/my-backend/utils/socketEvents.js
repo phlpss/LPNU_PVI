@@ -4,7 +4,7 @@ const {
     UPDATE_ROOM_USERS,
     GET_ROOMS,
     GET_ROOM_USERS
-} = require('../actions/socketio');
+} = require('../socket-server');
 
 module.exports = {
     JOIN_ROOM: (socket, data) => {
