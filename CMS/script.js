@@ -37,6 +37,10 @@ $(function () {
         $('#addModal').show();
     });
 
+    $('#addNewChat').click(function () {
+        $('#newChatRoom').show();
+    });
+
     $('#createStudentButton').click(createStudent);
 
     $('#updateStudentButton').click(function () {

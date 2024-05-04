@@ -320,6 +320,38 @@
         </div>
     </section>
 
+
+    <div id="newChatRoom" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New  Chat</h2>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="fname">Chat Name:</label>
+                    <input type="text" id="newChatName" name="fname">
+                </div>
+
+                <div class="input-group">
+                    <label for="invitationList">Invitation List:</label>
+                    <select id="invitationList" name="invitationList" multiple>
+                        <option value="user1">User 1</option>
+                        <option value="user2">User 2</option>
+                        <option value="user3">User 3</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeNewChatRoom"><img src='assets/cross_icon.svg' class="cancelStudentBt"
+                                                       id="clostNewChatBt" width="40" height="40" alt="Cross Icon">
+                </button>
+                <button id="createNewChatRoom"><img src='assets/tick_icon.svg' class="confirmStudentBt"
+                                                      id="confirmNewChatBt" width="40" height="40" alt="Tick Icon">
+                </button>
+            </div>
+        </div>
+    </div>
+
     <section id="Messages" class="tabcontent">
         <div class="container-fluid h-100">
             <div class="row-h-100">
@@ -327,7 +359,7 @@
                 <div class="col-4">
                     <div class="chatroom-header">
                         <h4> Chat room </h4>
-                        <button class="btn btn-link">+ New chat room</button>
+                        <button class="btn btn-link" id ="addNewChat">+ New chat room</button>
                     </div>
                     <div class="list-group">
                         <a href="#" class="list-group-item list-group-item-action active">Admin</a>
