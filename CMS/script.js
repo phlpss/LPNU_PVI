@@ -383,3 +383,8 @@ document.getElementById("signupButton").addEventListener("click", function () {
             console.error('Error:', error);
         });
 });
+
+document.getElementById("loginPage").style.display = "none";
+document.getElementById("signupPage").style.display = "none";
+document.getElementById("tabandcontent").style.display = "flex";
+document.getElementById("navbar").style.display = "flex";
