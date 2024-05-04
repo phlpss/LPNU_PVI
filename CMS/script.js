@@ -330,12 +330,12 @@ document.getElementById("loginButton").addEventListener("click", function () {
         },
         body: JSON.stringify({email: email, password: password}),
     })
-        .then(response => response.json())
+        // .then(response => response.json())
         .then(data => {
-            // Handle response
-            console.log('Success:', data);
-            if (data.success) {
+            if (data.status === 200) {
+
                 document.getElementById("loginPage").style.display = "none";
+                document.getElementById("signupPage").style.display = "none";
                 document.getElementById("tabandcontent").style.display = "flex";
                 document.getElementById("navbar").style.display = "flex";
                 document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
