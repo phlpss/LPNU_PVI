@@ -23,7 +23,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>-->
 </head>
 <body>
 
@@ -333,11 +333,11 @@
                 </div>
 
                 <div class="input-group">
-                    <label for="invitationList">Invitation List:</label>
-                    <select id="invitationList" name="invitationList" multiple>
-                        <option value="user1">User 1</option>
-                        <option value="user2">User 2</option>
-                        <option value="user3">User 3</option>
+                    <label for="gender">Gender:</label>
+                    <select id="ivitationList" name="Invitation List">
+                        <option value="Male">Alex</option>
+                        <option value="Female">NoAlex</option>
+                        <option value="Female">Other</option>
                     </select>
                 </div>
             </div>
@@ -389,7 +389,8 @@
                 </div>
             </div>
         </div>
-        <script>
+        <script type="module">
+            import { io } from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
             (function () {
                 const messages = document.querySelector('.overflow-auto'); // Where messages will be displayed
                 const textarea = document.querySelector('.new-message textarea'); // The textarea for new messages
@@ -404,39 +405,44 @@
                     messages.scrollTop = messages.scrollHeight; // Scroll to the bottom
                 };
 
-                // Connect to socket.io
-                const socket = io.connect('http://127.0.0.1:3000');
+                const socket = io("ws://localhost:3000", {
+                    reconnectionDelayMax: 10000,
+                    // auth: {
+                    //     username: "vmurmilo@abc.com"
+                    // },
+                    //
+                });
 
-                // Check for connection
                 if (socket !== undefined) {
                     console.log('Connected to socket...');
+                    socket.emitWithAck('get messages',{})
 
-                    socket.on('output', function (data) {
-                        if (data.length) {
-                            data.forEach(msg => appendMessage(msg.name, msg.message));
-                        }
-                    });
-
-                    // Listen for the send button click event
-                    sendButton.addEventListener('click', function () {
-                        const name = 'Your Name Here'; // Replace with actual logic to retrieve user's name
-                        const message = textarea.value.trim();
-                        if (message) {
-                            socket.emit('input', {
-                                name: name,
-                                message: message
-                            });
-                            textarea.value = ''; // Clear the input field
-                        }
-                    });
-
-                    // Handle input
-                    textarea.addEventListener('keydown', function (event) {
-                        if (event.key === 'Enter' && !event.shiftKey) {
-                            event.preventDefault();
-                            sendButton.click();
-                        }
-                    });
+                    // socket.on('output', function (data) {
+                    //     if (data.length) {
+                    //         data.forEach(msg => appendMessage(msg.name, msg.message));
+                    //     }
+                    // });
+                    //
+                    // // Listen for the send button click event
+                    // sendButton.addEventListener('click', function () {
+                    //     const name = 'Your Name Here'; // Replace with actual logic to retrieve user's name
+                    //     const message = textarea.value.trim();
+                    //     if (message) {
+                    //         socket.emit('input', {
+                    //             name: name,
+                    //             message: message
+                    //         });
+                    //         textarea.value = ''; // Clear the input field
+                    //     }
+                    // });
+                    //
+                    // // Handle input
+                    // textarea.addEventListener('keydown', function (event) {
+                    //     if (event.key === 'Enter' && !event.shiftKey) {
+                    //         event.preventDefault();
+                    //         sendButton.click();
+                    //     }
+                    // });
 
                     // Handling clear button functionality if needed
                     // Note: Make sure you have a clear button defined in your HTML if you want to use this.
