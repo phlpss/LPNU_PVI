@@ -30,14 +30,51 @@
 <div class="login-page" id="loginPage">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
+            <!-- Log In Form -->
             <form id="loginForm">
-                <label for="firstName"></label><input type="text" id="firstName" name="fname" class="form-control" placeholder="Enter first name"><br><br>
-                <input type="text" id="lastName" name="lname" class="form-control" placeholder="Enter last name"><br><br>
-                <button type="button" class="button" id="loginButton">Sigh in</button>
+                <h3>Sign In</h3>
+                <div class="form-group">
+                    <input type="email" id="email" class="form-control" name="email" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" class="form-control" name="password"
+                           placeholder="Enter password">
+                </div>
+                <div>
+                    <button type="button" class="button" id="loginButton">Log in</button>
+                    <button type="button" class="button" id="signupLink">Sign up</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
+<div class="signup-page" id="signupPage">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <!-- Sign Up Form -->
+            <form id="signupForm">
+                <h3>Sign Up</h3>
+                <div class="form-group">
+                    <input type="text" id="signupFirstName" class="form-control" name="firstName"
+                           placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="signupLastName" class="form-control" name="lastName"
+                           placeholder="Enter last name">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="signupEmail" class="form-control" name="email" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="signupPassword" class="form-control" name="password"
+                           placeholder="Enter password">
+                </div>
+                <button type="button" class="button" id="signupButton">Sign Up</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <!--NavBar-->
 <nav class="navbar" id="navbar">
@@ -56,7 +93,8 @@
         </li>
 
         <li class='dropdown'><a href="#">
-            <img src='assets/user_icon_white.svg' alt='user' height='26' width='26'> <span id="userName">Default User</span>
+            <img src='assets/user_icon_white.svg' alt='user' height='26' width='26'> <span
+                id="userName">Default User</span>
         </a>
             <div class='dropdown-content'>
                 <a href='https://www.linkedin.com/in/katya-philip-488ba4244/'>Profile</a>
@@ -351,7 +389,7 @@
                     sendButton.addEventListener('click', function () {
                         const name = 'Your Name Here'; // Replace with actual logic to retrieve user's name
                         const message = textarea.value.trim();
-                        if(message) {
+                        if (message) {
                             socket.emit('input', {
                                 name: name,
                                 message: message

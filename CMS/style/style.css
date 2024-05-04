@@ -249,8 +249,15 @@ aside, main {
 
 
 /* LOG IN PAGE */
-
+/* SING UP PAGE */
 .login-page {
+    display: flex;
+}
+.signup-page {
+    display: none;
+}
+/* Base styles for login and signup pages */
+.login-page, .signup-page {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -260,7 +267,8 @@ aside, main {
     margin: 0;
 }
 
-.login-page::before {
+/* Background settings for both pages */
+.login-page::before, .signup-page::before {
     content: '';
     position: fixed;
     top: 0;
@@ -276,11 +284,14 @@ aside, main {
     transform: scale(2);
 }
 
-.login-page .row {
+/* Styling for the form containers */
+.login-page .row, .signup-page .row {
     position: relative;
     z-index: 1;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+
     width: 30%;
     background: rgba(0, 0, 0, 0.5);
     padding: 40px;
@@ -288,8 +299,11 @@ aside, main {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
-.login-page input[type="text"],
-.login-page input[type="password"] {
+/* Input field styling */
+.login-page input,
+.signup-page input[type="text"],
+.signup-page input[type="email"],
+.signup-page input[type="password"] {
     width: 90%;
     background: transparent;
     border: none;
@@ -297,43 +311,51 @@ aside, main {
     color: #ddd;
     padding: 10px 20px;
     margin-bottom: 20px;
+    transition: all 0.3s ease;
 }
 
-.login-page input[type="text"]:focus,
-.login-page input[type="password"]:focus {
+.login-page input:focus,
+.signup-page input:focus {
     outline: none;
     border-color: #ffffff;
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-.login-page #loginForm {
+/* Form alignment */
+.login-page #loginForm,
+.signup-page #signupForm {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
-.login-page .button {
+.login-page .button,
+.signup-page .button {
     background: rgba(255, 255, 255, 0.2);
     color: #ddd;
-    border-color: #ddd;
     border-radius: 10px;
     padding: 10px 25px;
-    font-size: 20px;
+    font-size: 16px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s ease;
     width: auto;
     text-align: center;
 }
 
-.login-page .button:hover {
+.login-page .button:hover,
+.signup-page .button:hover,
+.login-page .button:active,
+.signup-page .button:active {
     color: white;
     background: #667e93;
     border-color: white;
+    transform: scale(0.98);
 }
 
+/* Responsive design adjustments */
 @media only screen and (max-width: 800px) {
-    .login-page .row {
+    .login-page .row, .signup-page .row {
         width: 80%;
     }
 }

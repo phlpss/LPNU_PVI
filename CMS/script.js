@@ -320,31 +320,67 @@ function resizeTableHeaders() {
 }
 
 document.getElementById("loginButton").addEventListener("click", function() {
-    // Simulated authentication process
-    let userFirstName = document.getElementById("firstName").value;
-    let userLastName = document.getElementById("lastName").value;
-    if(!userFirstName || !userLastName) {
-        userFirstName = "Default"
-        userLastName = "User"
-    }
+    let userFirstName = document.getElementById("loginFirstName").value;
+    let userLastName = document.getElementById("loginLastName").value;
 
-    // put user to database
+    // Assume we have an API endpoint "/api/login" for logging in users
+    fetch('/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ firstName: userFirstName, lastName: userLastName }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Handle response
+            console.log('Success:', data);
+            if (data.success) {
+                document.getElementById("loginPage").style.display = "none";
+                document.getElementById("tabandcontent").style.display = "flex";
+                document.getElementById("navbar").style.display = "flex";
+                document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
+            } else {
+                alert('Login failed!');
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+});
 
-    // Hide login page and show content page
+document.getElementById('signupLink').addEventListener("click", function() {
     document.getElementById("loginPage").style.display = "none";
-    document.getElementById("tabandcontent").style.display = "flex";
-    document.getElementById("navbar").style.display = "flex";
+    document.getElementById("signupPage").style.display = "flex";
+})
+document.getElementById("signupButton").addEventListener("click", function() {
+    let userFirstName = document.getElementById("signupFirstName").value;
+    let userLastName = document.getElementById("signupLastName").value;
+    let userFullName = userFirstName + " " + userLastName;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-    // Set username in navbar
-    document.getElementById("userName").textContent = userFirstName + " " + userLastName;
-
-    // Add logout functionality
-    document.getElementById("logoutButton").addEventListener("click", function() {
-        document.getElementById("tabandcontent").style.display = "none";
-        document.getElementById("navbar").style.display = "none";
-        document.getElementById("loginPage").style.display = "flex";
-        document.getElementById("firstName").value = "";
-        document.getElementById("lastName").value = "";
-        document.getElementById("userName").textContent = "Katya Filip";
-    });
+    // Assume we have an API endpoint "/api/signup" for signing up users
+    fetch('http://localhost:3000/api/signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: userFullName, email: email, password: password }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Handle response
+            console.log('Success:', data);
+            if (data.success) {
+                alert('Signup successful, please log in!');
+                document.getElementById("signupPage").style.display = "none";
+                document.getElementById("loginPage").style.display = "flex";
+            } else {
+                alert('Signup failed!');
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 });

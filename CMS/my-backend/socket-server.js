@@ -12,6 +12,7 @@ const userCollection = 'onlineUsers';   // Collection to maintain list of curren
 const app = express();
 const server = http.createServer(app);
 app.use(cors());
+app.use(express.json());
 
 const {Pool} = require('pg');
 const mongoose = require('mongoose');
@@ -32,6 +33,19 @@ const messageSchema = new Schema({
 });
 
 const Message = mongoose.model('Message', messageSchema);
+
+const userSchema = new Schema({
+    username: {type: String, required: true, unique: true},
+    email: {
+        type: String,
+        trim: true,
+        unique: true,
+        required: true
+    },
+    password: {type: String, required: true},
+});
+
+const User = mongoose.model('User', userSchema);
 
 mongoose
     .connect('mongodb://localhost:27017/chat_db')
@@ -60,6 +74,43 @@ const pool = new Pool({
 app.get('/', (req, res) => {
     res.send("dummy message");
 });
+
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+// Signup Endpoint
+app.post('/api/signup', async (req, res) => {
+    try {
+        const {username, email, password} = req.body;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const newUser = new User({username, email, password: hashedPassword});
+        await newUser.save();
+        res.status(201).send('User created successfully');
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).send('Error creating user');
+    }
+});
+
+// Login Endpoint
+app.post('/api/login', async (req, res) => {
+    try {
+        const {username, password} = req.body;
+        const user = await User.findOne({username});
+
+        if (user && await bcrypt.compare(password, user.password)) {
+            // Assuming a session or token based approach should be used here for real applications
+            res.send('User authenticated successfully');
+        } else {
+            res.status(401).send('Authentication failed');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).send('Error logging in');
+    }
+});
+
 
 io.on('connection', (socket) => {
     console.log('A user connected');
@@ -94,6 +145,7 @@ io.on('connection', (socket) => {
         console.log('User disconnected');
     });
 });
+
 async function CheckNameAvailability(chatName, chatOwner) {
     let success = true;
     try {
@@ -113,6 +165,7 @@ async function CheckNameAvailability(chatName, chatOwner) {
     }
     return success;
 }
+
 server.listen(3000, () => {
     console.log('listening on *:3000');
 });
