@@ -357,8 +357,8 @@ document.getElementById("signupButton").addEventListener("click", function() {
     let userFirstName = document.getElementById("signupFirstName").value;
     let userLastName = document.getElementById("signupLastName").value;
     let userFullName = userFirstName + " " + userLastName;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
 
     // Assume we have an API endpoint "/api/signup" for signing up users
     fetch('http://localhost:3000/api/signup', {
