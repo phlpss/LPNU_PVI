@@ -96,9 +96,10 @@ app.post('/api/signup', async (req, res) => {
 // Login Endpoint
 app.post('/api/login', async (req, res) => {
     try {
-        const {username, password} = req.body;
-        const user = await User.findOne({username});
-
+        const {email, password} = req.body;
+        console.log('received email: '+ email)
+        const user = await User.findOne({email: email});
+        console.log(user)
         if (user && await bcrypt.compare(password, user.password)) {
             // Assuming a session or token based approach should be used here for real applications
             res.send('User authenticated successfully');

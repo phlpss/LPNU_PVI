@@ -99,8 +99,7 @@ $(function () {
     resizeTableHeaders();
 });
 
-let studentsData = [
-];
+let studentsData = [];
 
 export class Student {
     constructor(id, group, name, gender, birthday, status) {
@@ -208,7 +207,7 @@ function createStudent() {
 }
 
 function addStudent(group, name, gender, birthday) {
-    const newStudent = new Student(null,group, name, gender, birthday, 'Active');
+    const newStudent = new Student(null, group, name, gender, birthday, 'Active');
 
     postStudent(newStudent).then(data => {
         studentsData.push(newStudent);
@@ -319,17 +318,17 @@ function resizeTableHeaders() {
     }
 }
 
-document.getElementById("loginButton").addEventListener("click", function() {
-    let userFirstName = document.getElementById("loginFirstName").value;
-    let userLastName = document.getElementById("loginLastName").value;
+document.getElementById("loginButton").addEventListener("click", function () {
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
 
     // Assume we have an API endpoint "/api/login" for logging in users
-    fetch('/api/login', {
+    fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ firstName: userFirstName, lastName: userLastName }),
+        body: JSON.stringify({email: email, password: password}),
     })
         .then(response => response.json())
         .then(data => {
@@ -349,11 +348,11 @@ document.getElementById("loginButton").addEventListener("click", function() {
         });
 });
 
-document.getElementById('signupLink').addEventListener("click", function() {
+document.getElementById('signupLink').addEventListener("click", function () {
     document.getElementById("loginPage").style.display = "none";
     document.getElementById("signupPage").style.display = "flex";
 })
-document.getElementById("signupButton").addEventListener("click", function() {
+document.getElementById("signupButton").addEventListener("click", function () {
     let userFirstName = document.getElementById("signupFirstName").value;
     let userLastName = document.getElementById("signupLastName").value;
     let userFullName = userFirstName + " " + userLastName;
@@ -366,7 +365,7 @@ document.getElementById("signupButton").addEventListener("click", function() {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username: userFullName, email: email, password: password }),
+        body: JSON.stringify({username: userFullName, email: email, password: password}),
     })
         .then(response => response.json())
         .then(data => {
