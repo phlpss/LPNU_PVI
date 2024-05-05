@@ -85,31 +85,55 @@ async function checkChatNameAvalability(msg, socket) {
 }
 
 io.on('connection', async (socket) => {
-
-    let userid = socket.handshake.query.userid;
-    console.log(userid)
-    if (userid === undefined) {
-        socket.emit('error', 'userid is required')
-        socket.disconnect()
+    async function connectUser() {
+        let userid = socket.handshake.query.userid;
+        console.log(userid)
+        if (userid === undefined) {
+            socket.emit('error', 'userid is required')
+            socket.disconnect()
+        }
+        console.log(`User ${userid} connected`)
+        let user = await getUser(userid)
+        console.log(`found user: ${user}`)
+        console.log(`User ${userid} connected`)
+        sidUserMap[socket.id] = {
+            userId: userid,
+            email: user.email
+        }
+        return user;
     }
-    console.log(`User ${userid} connected`)
-    let user = await getUser(userid)
-    sidUserMap[socket.id] = {
-        userId: userid,
-        email: user.email
+
+    async function joinChatRooms(user) {
+        const chats = await findUserChats(user.email)
+        console.log('Found chats: ')
+        console.log(chats)
+
+        chats.forEach((chat) => {
+            socket.join(chat.name);
+            console.log(`${user.email} Joined chat room: ${chat.name}`);
+        });
     }
-    console.log('Sid usermap')
-    console.log(sidUserMap)
-    const chats = await findUserChats(userid)
 
-    chats.forEach((chat) => {
-        socket.join(chat.name);
-        console.log(`${userId} Joined chat room: ${chat.name}`);
-    });
+    let user = await connectUser();
+    await joinChatRooms(user);
 
-    socket.on('chat message', (msg, callback) => {
-        // console.log('Message received:' + JSON.stringify(msg));
-        io.emit('chat message', msg)
+    socket.on('send message', async (msg, callback) => {
+        let from = sidUserMap[socket.id].email;
+        let chatId = msg.chatId;
+        let messageContent = msg.message;
+        let message = new Message({
+            chatId: chatId,
+            author: from,
+            datetime: new Date(),
+            message: messageContent,
+        })
+        const chat = await findChatById(chatId)
+        await message.save()
+        socket.to(chat.name).emit('new message', {
+            from: from,
+            chatId: chatId,
+            message: messageContent
+        });
         callback({
             status: "ok"
         });
@@ -122,9 +146,15 @@ io.on('connection', async (socket) => {
         });
     });
 
-    async function findUserChats(userId) {
+    async function findUserChats(email) {
         return Chat.find({
-            $or: [{owner: userId}, {members: {$in: [userId]}}],
+            $or: [{owner: email}, {members: {$in: [email]}}],
+        });
+    }
+
+    async function findChatById(chatId) {
+        return Chat.findOne({
+            _id: chatId
         });
     }
 

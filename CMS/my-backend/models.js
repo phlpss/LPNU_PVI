@@ -14,7 +14,7 @@ const Chat = mongoose.model('chat', chatSchema);
 const messageSchema = new Schema({
     chatId: String,
     author: String,
-    order: Number,
+    datetime: Date,
     message: String,
 });
 

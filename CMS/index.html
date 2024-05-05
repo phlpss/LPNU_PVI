@@ -389,76 +389,7 @@
                 </div>
             </div>
         </div>
-        <script type="module">
-            import { io } from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
-            (function () {
-                const messages = document.querySelector('.overflow-auto'); // Where messages will be displayed
-                const textarea = document.querySelector('.new-message textarea'); // The textarea for new messages
-                const sendButton = document.getElementById('sendButton'); // The send button for messages
-
-                // Function to append messages to the display area
-                const appendMessage = (name, message) => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.setAttribute('class', 'chat-message');
-                    messageDiv.textContent = name + ": " + message;
-                    messages.appendChild(messageDiv);
-                    messages.scrollTop = messages.scrollHeight; // Scroll to the bottom
-                };
-
-                const socket = io("ws://localhost:3000", {
-                    reconnectionDelayMax: 10000,
-                    // auth: {
-                    //     username: "vmurmilo@abc.com"
-                    // },
-                    //
-                });
-
-                if (socket !== undefined) {
-                    console.log('Connected to socket...');
-                    socket.emitWithAck('get messages',{})
-
-                    // socket.on('output', function (data) {
-                    //     if (data.length) {
-                    //         data.forEach(msg => appendMessage(msg.name, msg.message));
-                    //     }
-                    // });
-                    //
-                    // // Listen for the send button click event
-                    // sendButton.addEventListener('click', function () {
-                    //     const name = 'Your Name Here'; // Replace with actual logic to retrieve user's name
-                    //     const message = textarea.value.trim();
-                    //     if (message) {
-                    //         socket.emit('input', {
-                    //             name: name,
-                    //             message: message
-                    //         });
-                    //         textarea.value = ''; // Clear the input field
-                    //     }
-                    // });
-                    //
-                    // // Handle input
-                    // textarea.addEventListener('keydown', function (event) {
-                    //     if (event.key === 'Enter' && !event.shiftKey) {
-                    //         event.preventDefault();
-                    //         sendButton.click();
-                    //     }
-                    // });
-
-                    // Handling clear button functionality if needed
-                    // Note: Make sure you have a clear button defined in your HTML if you want to use this.
-                    /*
-                    const clearBtn = document.getElementById('clear');
-                    clearBtn.addEventListener('click', function () {
-                        socket.emit('clear');
-                        messages.innerHTML = ''; // Clear the messages display
-                    });
-
-                    socket.on('cleared', function () {
-                        messages.innerHTML = ''; // Clear the messages display
-                    });
-                    */
-                }
-            })();
+        <script type="module" src="socket-client.js">
         </script>
     </section>
 </div>
