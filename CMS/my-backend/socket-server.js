@@ -36,6 +36,7 @@ app.get('/', (req, res) => {
 });
 
 const bcrypt = require('bcrypt');
+const {callback} = require("pg/lib/native/query");
 const saltRounds = 10;
 
 app.post('/api/signup', async (req, res) => {
@@ -60,7 +61,10 @@ app.post('/api/login', async (req, res) => {
         console.log(user)
         if (user && await bcrypt.compare(password, user.password)) {
             // Assuming a session or token based approach should be used here for real applications
-            res.send('User authenticated successfully');
+            res.send({
+                userId: user._id,
+                email: user.email
+            });
         } else {
             res.status(401).send('Authentication failed');
         }
@@ -70,6 +74,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+const sidUserMap = {};
 
 async function checkChatNameAvalability(msg, socket) {
     const existingChat = await Chat.find({
@@ -79,8 +84,28 @@ async function checkChatNameAvalability(msg, socket) {
         socket.emit('error', 'Error creating chat. Chat already exists')
 }
 
-io.on('connection', (socket) => {
-    console.log('A user connected');
+io.on('connection', async (socket) => {
+
+    let userid = socket.handshake.query.userid;
+    console.log(userid)
+    if (userid === undefined) {
+        socket.emit('error', 'userid is required')
+        socket.disconnect()
+    }
+    console.log(`User ${userid} connected`)
+    let user = await getUser(userid)
+    sidUserMap[socket.id] = {
+        userId: userid,
+        email: user.email
+    }
+    console.log('Sid usermap')
+    console.log(sidUserMap)
+    const chats = await findUserChats(userid)
+
+    chats.forEach((chat) => {
+        socket.join(chat.name);
+        console.log(`${userId} Joined chat room: ${chat.name}`);
+    });
 
     socket.on('chat message', (msg, callback) => {
         // console.log('Message received:' + JSON.stringify(msg));
@@ -97,12 +122,18 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on('get all chats', async (relatedUser) => {
+    async function findUserChats(userId) {
+        return Chat.find({
+            $or: [{owner: userId}, {members: {$in: [userId]}}],
+        });
+    }
+
+    socket.on('get all chats', async (relatedUser, callback) => {
         try {
-            const existingChats = await Chat.find({
-                $or: [{owner: relatedUser}, {members: {$in: [relatedUser]}}],
-            });
-            socket.emit('all chats', existingChats);
+            const existingChats = await findUserChats(relatedUser);
+            callback({
+                chats: existingChats
+            })
         } catch (error) {
             console.error('Error checking chat name availability:', error);
         }
@@ -124,6 +155,12 @@ io.on('connection', (socket) => {
             console.error('Error checking chat:', error);
         }
     });
+
+    async function getUser(userId) {
+        return User.findOne({
+            _id: userId
+        })
+    }
 
     function emitError(message) {
         socket.emit('error', message)

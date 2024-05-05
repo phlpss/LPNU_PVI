@@ -1,4 +1,5 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
+import {connectToSocket} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
@@ -334,7 +335,6 @@ document.getElementById("loginButton").addEventListener("click", function () {
         },
         body: JSON.stringify({email: email, password: password}),
     })
-        // .then(response => response.json())
         .then(data => {
             if (data.status === 200) {
 
@@ -343,6 +343,7 @@ document.getElementById("loginButton").addEventListener("click", function () {
                 document.getElementById("tabandcontent").style.display = "flex";
                 document.getElementById("navbar").style.display = "flex";
                 document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
+                connectToSocket(data.json()['userId'])
             } else {
                 alert('Login failed!');
             }
@@ -392,3 +393,5 @@ document.getElementById("loginPage").style.display = "none";
 document.getElementById("signupPage").style.display = "none";
 document.getElementById("tabandcontent").style.display = "flex";
 document.getElementById("navbar").style.display = "flex";
+
+connectToSocket('6636856dc531b0140bcaea27')

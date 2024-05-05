@@ -2,10 +2,10 @@ import {io} from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
 
 const messages = document.querySelector('.overflow-auto'); // Where messages will be displayed
 
-const socket = io("ws://localhost:3000", {
-    reconnectionDelayMax: 10000,
-});
+let socket
 
-if (socket !== undefined) {
-    console.log('Connected to socket...');
+export function connectToSocket(userId) {
+    socket = io(`ws://localhost:3000?userid=${userId}`, {
+        reconnectionDelayMax: 10000,
+    });
 }
