@@ -5,7 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const {Server} = require('socket.io');
 const cors = require('cors');
-const {User,Chat,Message} = require('./models.js')
+const {User, Chat, Message} = require('./models.js')
 
 
 const app = express();
@@ -55,7 +55,7 @@ app.post('/api/signup', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const {email, password} = req.body;
-        console.log('received email: '+ email)
+        console.log('received email: ' + email)
         const user = await User.findOne({email: email});
         console.log(user)
         if (user && await bcrypt.compare(password, user.password)) {
@@ -70,6 +70,14 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+
+async function checkChatNameAvalability(msg, socket) {
+    const existingChat = await Chat.find({
+        name: msg.name
+    });
+    if (existingChat !== undefined)
+        socket.emit('error', 'Error creating chat. Chat already exists')
+}
 
 io.on('connection', (socket) => {
     console.log('A user connected');
@@ -99,6 +107,27 @@ io.on('connection', (socket) => {
             console.error('Error checking chat name availability:', error);
         }
     });
+
+    socket.on('create chat', async (msg, callback) => {
+        try {
+            const newChat = new Chat({
+                owner: msg.owner,
+                name: msg.name,
+                members: msg.members
+            });
+            await newChat.save()
+            callback({
+                chat: newChat
+            })
+        } catch (error) {
+            emitError(`Error creating chat: ${error.message}`);
+            console.error('Error checking chat:', error);
+        }
+    });
+
+    function emitError(message) {
+        socket.emit('error', message)
+    }
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
