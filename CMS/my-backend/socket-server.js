@@ -5,9 +5,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 const {Server} = require('socket.io');
 const cors = require('cors');
+const {User,Chat,Message} = require('./models.js')
 
-const chatCollection = 'chats';         // Collection to store all chats
-const userCollection = 'onlineUsers';   // Collection to maintain list of currently online users
 
 const app = express();
 const server = http.createServer(app);
@@ -16,36 +15,6 @@ app.use(express.json());
 
 const {Pool} = require('pg');
 const mongoose = require('mongoose');
-
-const Schema = mongoose.Schema;
-const chatSchema = new Schema({
-    owner: String,
-    name: String,
-    members: [String],
-});
-
-const Chat = mongoose.model('chat', chatSchema);
-const messageSchema = new Schema({
-    chatId: String,
-    author: String,
-    order: Number,
-    message: String,
-});
-
-const Message = mongoose.model('Message', messageSchema);
-
-const userSchema = new Schema({
-    username: {type: String, required: true, unique: true},
-    email: {
-        type: String,
-        trim: true,
-        unique: true,
-        required: true
-    },
-    password: {type: String, required: true},
-});
-
-const User = mongoose.model('User', userSchema);
 
 mongoose
     .connect('mongodb://localhost:27017/chat_db')
@@ -62,15 +31,6 @@ const io = socketIo(server, {
     },
 });
 
-// Create a pool to manage database connections
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: 'embryo',
-    port: 5432,
-});
-
 app.get('/', (req, res) => {
     res.send("dummy message");
 });
@@ -78,7 +38,6 @@ app.get('/', (req, res) => {
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-// Signup Endpoint
 app.post('/api/signup', async (req, res) => {
     try {
         const {username, email, password} = req.body;
@@ -93,7 +52,6 @@ app.post('/api/signup', async (req, res) => {
     }
 });
 
-// Login Endpoint
 app.post('/api/login', async (req, res) => {
     try {
         const {email, password} = req.body;
