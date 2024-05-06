@@ -206,6 +206,8 @@ function createChat() {
 
     createNewChat(name, members)
         .then(res => console.log(res))
+
+    setTimeout(showChats, 1000)
 }
 
 
