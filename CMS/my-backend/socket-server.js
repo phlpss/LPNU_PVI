@@ -169,9 +169,7 @@ io.on('connection', async (socket) => {
         try {
             const user = sidUserMap[socket.id]
             const existingChats = await findUserChats(user);
-            callback({
-                chats: existingChats
-            })
+            callback(existingChats)
         } catch (error) {
             console.error('Error checking chat name availability:', error);
         }

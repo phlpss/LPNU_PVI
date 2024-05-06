@@ -1,5 +1,5 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
-import {connectToSocket, createNewChat, getUsers} from "./socket-client.js";
+import {connectToSocket, createNewChat, getChats, getUsers} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
@@ -114,6 +114,26 @@ $(function () {
     resizeTableHeaders();
 });
 
+function showChats(){
+    const chatList = document.querySelector('#chat-list');
+    getChats().then(chats => {
+        console.log(`chats: ${chats}`)
+        chatList.innerHTML=''
+        chats.forEach(chat => {
+            const chatLink = document.createElement('a');
+            chatLink.href = '#';
+            chatLink.className = 'list-group-item list-group-item-action';
+            chatLink.textContent = chat.name; // Display the chat's name
+
+            // Optional: Add a tooltip or data attribute if you want to show more information on hover, etc.
+            chatLink.setAttribute('title', `Owned by ${chat.owner} with ${chat.members.length} members`);
+
+            chatList.appendChild(chatLink);
+        });
+    }).catch(error => {
+        console.error('Failed to load chat rooms:', error);
+    });
+}
 
 function createChat() {
 
@@ -156,6 +176,7 @@ function openTab(evt, tabName) {
     $(".tabcontent").hide();
     $(".tablinks").removeClass("active");
     $("#" + tabName).show();
+    showChats()
     $(evt.currentTarget).addClass("active");
 }
 
