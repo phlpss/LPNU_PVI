@@ -158,6 +158,13 @@ io.on('connection', async (socket) => {
         });
     }
 
+    socket.on('get users', async (msg, callback) => {
+        console.log('Get users request')
+        const users = await User.find()
+        const emails = users.map(user => user.email)
+        callback(emails)
+    })
+
     socket.on('get chats', async (msg, callback) => {
         try {
             const user = sidUserMap[socket.id]
