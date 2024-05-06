@@ -3,10 +3,12 @@ import {io} from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
 let socket
 let currentUserName = 'vova vova'
 
-export function connectToSocket(userId) {
+export function connectToSocket(userId, username) {
     socket = io(`ws://localhost:3000?userid=${userId}`, {
         reconnectionDelayMax: 10000,
     });
+
+    currentUserName = username
 
     socket.on('new message', (msg) => {
         const messagesContainer = document.getElementById('chatMessages');

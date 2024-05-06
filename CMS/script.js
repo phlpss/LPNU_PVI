@@ -425,25 +425,21 @@ document.getElementById("loginButton").addEventListener("click", function () {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({email: email, password: password}),
+    }).then(response => {
+        if (!response.ok) {
+            alert('Login failed!');
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
     })
         .then(data => {
-            if (data.status === 200) {
-
-                document.getElementById("loginPage").style.display = "none";
-                document.getElementById("signupPage").style.display = "none";
-                document.getElementById("tabandcontent").style.display = "flex";
-                document.getElementById("navbar").style.display = "flex";
-                document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
-                connectToSocket(data.json()['userId'])
-                //TODO: remove hardcode
-                currentUserName = 'vova vova'
-            } else {
-                alert('Login failed!');
-            }
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("signupPage").style.display = "none";
+            document.getElementById("tabandcontent").style.display = "flex";
+            document.getElementById("navbar").style.display = "flex";
+            // document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
+            connectToSocket(data.userId, data.username)
         })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
 });
 
 document.getElementById('signupLink').addEventListener("click", function () {
@@ -482,9 +478,9 @@ document.getElementById("signupButton").addEventListener("click", function () {
         });
 });
 
-document.getElementById("loginPage").style.display = "none";
-document.getElementById("signupPage").style.display = "none";
-document.getElementById("tabandcontent").style.display = "flex";
-document.getElementById("navbar").style.display = "flex";
+// document.getElementById("loginPage").style.display = "none";
+// document.getElementById("signupPage").style.display = "none";
+// document.getElementById("tabandcontent").style.display = "flex";
+// document.getElementById("navbar").style.display = "flex";
 
-connectToSocket('663659fc6eb2c1c7343f1ddd')
+// connectToSocket('663659fc6eb2c1c7343f1ddd')

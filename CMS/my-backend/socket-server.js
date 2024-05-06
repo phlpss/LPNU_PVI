@@ -63,7 +63,8 @@ app.post('/api/login', async (req, res) => {
             // Assuming a session or token based approach should be used here for real applications
             res.send({
                 userId: user._id,
-                email: user.email
+                email: user.email,
+                username: user.username
             });
         } else {
             res.status(401).send('Authentication failed');
