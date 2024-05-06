@@ -57,6 +57,13 @@ export function createNewChat(name, members) {
     })
 }
 
+export function sendMessageToServer(chatId, message){
+    socket.emit('send message', {
+        chatId: chatId,
+        message: message
+    })
+}
+
 export function getChatWithMessages(chatId) {
     return new Promise((resolve, reject) => {
         socket.emit('get messages', {chatId: chatId}, (response) => {

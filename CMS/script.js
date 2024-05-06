@@ -1,5 +1,12 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
-import {connectToSocket, createNewChat, getChats, getChatWithMessages, getUsers} from "./socket-client.js";
+import {
+    connectToSocket,
+    createNewChat,
+    getChats,
+    getChatWithMessages,
+    getUsers,
+    sendMessageToServer
+} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
@@ -91,6 +98,10 @@ $(function () {
         $('#newChatRoom').hide();
     })
 
+    $('#sendButton').click(function (){
+        sendMessage()
+    })
+
     $('#previousPage').click(function () {
         if (currentPage > 1) {
             currentPage--;
@@ -114,6 +125,19 @@ $(function () {
     $(window).resize(resizeTableHeaders);
     resizeTableHeaders();
 });
+
+function sendMessage(){
+
+    const messageInput = document.querySelector('.new-message textarea');
+    const message = messageInput.value.trim(); // Trim to remove extra whitespace
+
+    const activeChatLink = document.querySelector('.list-group-item.active');
+    const chatId = activeChatLink.getAttribute('id').replace('chat_', ''); // Extract the chatId
+
+    sendMessageToServer(chatId, message);
+
+    messageInput.value = '';
+}
 
 function displayChat(chatId) {
     getChatWithMessages(chatId).then(chatData => {
@@ -161,9 +185,14 @@ function showChats() {
 
             // Optional: Add a tooltip or data attribute if you want to show more information on hover, etc.
             chatLink.setAttribute('title', `Owned by ${chat.owner} with ${chat.members.length} members`);
-            chatLink.setAttribute('id', `chat_${chat.name}`)
+            chatLink.setAttribute('id', `chat_${chat._id}`)
             chatList.appendChild(chatLink);
-            chatLink.onclick = () => displayChat(chat._id);  // Set up click event handler
+            chatLink.onclick = () => {
+                const allChatLinks = document.querySelectorAll('.list-group-item');
+                allChatLinks.forEach(link => link.classList.remove('active'));
+                chatLink.classList.add('active');
+                displayChat(chat._id)
+            }
         });
     }).catch(error => {
         console.error('Failed to load chat rooms:', error);
