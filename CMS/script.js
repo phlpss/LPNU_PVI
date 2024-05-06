@@ -4,7 +4,7 @@ import {connectToSocket, createNewChat, getChats, getChatWithMessages, getUsers}
 let currentPage = 1;
 const studentsPerPage = 10;
 let currentStudentId = 1;
-let currentUserName = 'vova vova'
+let currentUserName
 
 $(function () {
     renderStudents(currentPage);
@@ -138,7 +138,7 @@ function updateChatDetails(chatData) {
             hour12: true  // Use hour12:true for AM/PM format
         });
         const messageDiv = document.createElement('div');
-        messageDiv.className = msg.author === currentUserName ? 'message-right' : 'message-left';  // Assuming you have the currentUserName defined somewhere
+        messageDiv.className = msg.author === currentUserName ? 'message-right' : 'message-left';
         messageDiv.innerHTML = `
         <div class="message-header">${msg.author} <span class="message-time">${formattedTime}</span></div>
         <div class="message-body">${msg.message}</div>
@@ -439,6 +439,7 @@ document.getElementById("loginButton").addEventListener("click", function () {
             document.getElementById("navbar").style.display = "flex";
             // document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
             connectToSocket(data.userId, data.username)
+            currentUserName = data.username
         })
 });
 
