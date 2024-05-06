@@ -140,11 +140,49 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('get messages', async (msg, callback) => {
-        const messages = await Message.find({
-            chatId: msg.chatId
-        });
-        callback(messages)
+        try {
+            const chat = await Chat.findOne({_id: msg.chatId});
+            if (!chat) {
+                callback({ error: "Chat not found" });
+                return;
+            }
+
+            const messages = await Message.find({chatId: msg.chatId});
+
+            // Collect all unique email addresses from messages to minimize database queries.
+            const userEmails = [...new Set(messages.map(message => message.author))];
+
+            // Fetch user details for each unique email.
+            const users = await User.find({email: {$in: userEmails}});
+            const emailToUsernameMap = users.reduce((acc, user) => {
+                acc[user.email] = user.username; // Create a map of email to username
+                return acc;
+            }, {});
+
+            // Map messages to include usernames instead of email addresses
+            const messageData = messages.map(m => ({
+                author: emailToUsernameMap[m.author],
+                message: m.message,
+                dateTime: m.datetime
+            }));
+
+            // Resolve usernames for chat members
+            const memberUsernames = await User.find({email: {$in: chat.members}});
+            const memberNames = memberUsernames.map(user => user.username);
+
+            const response = {
+                chatName: chat.name,
+                members: memberNames,
+                messages: messageData
+            };
+
+            callback(response); // Send the combined data back to the client
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            callback({ error: "Failed to fetch messages" });
+        }
     });
+
 
     async function findUserChats(user) {
         return Chat.find({

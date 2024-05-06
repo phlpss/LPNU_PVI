@@ -39,25 +39,8 @@ export function createNewChat(name, members) {
 
 export function getChatWithMessages(chatId) {
     return new Promise((resolve, reject) => {
-        resolve({
-            members: ['vova vova', 'vova2'],
-            chatName: 'Vova Test',
-            messages: [{
-                author: 'vova vova',
-                message: 'vova huy',
-                dateTime: new Date()
-            },
-                {
-                    author: 'vova2',
-                    message: 'vova huy 2',
-                    dateTime: new Date()
-                },
-                {
-                    author: 'vova vova',
-                    message: 'vova huy 3',
-                    dateTime: new Date()
-                }
-            ]
+        socket.emit('get messages', {chatId: chatId}, (response) => {
+            resolve(response)
         })
     })
 }
