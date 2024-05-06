@@ -1,9 +1,10 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
-import {connectToSocket, createNewChat, getChats, getUsers} from "./socket-client.js";
+import {connectToSocket, createNewChat, getChats, getChatWithMessages, getUsers} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
 let currentStudentId = 1;
+let currentUserName = 'vova vova'
 
 $(function () {
     renderStudents(currentPage);
@@ -114,11 +115,44 @@ $(function () {
     resizeTableHeaders();
 });
 
-function showChats(){
+function displayChat(chatId) {
+    getChatWithMessages(chatId).then(chatData => {
+        updateChatDetails(chatData);
+    });
+}
+
+function updateChatDetails(chatData) {
+    const membersDiv = document.getElementById('members');
+    const messagesContainer = document.getElementById('chatMessages');
+
+    membersDiv.textContent = `Members: ${chatData.members.join(', ')}`;
+    document.getElementById('chatName').textContent = `Chat room ${chatData.chatName}`;
+
+    messagesContainer.innerHTML = '';
+
+    chatData.messages.forEach(msg => {
+        const date = new Date(msg.dateTime);
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true  // Use hour12:true for AM/PM format
+        });
+        const messageDiv = document.createElement('div');
+        messageDiv.className = msg.author === currentUserName ? 'message-right' : 'message-left';  // Assuming you have the currentUserName defined somewhere
+        messageDiv.innerHTML = `
+        <div class="message-header">${msg.author} <span class="message-time">${formattedTime}</span></div>
+        <div class="message-body">${msg.message}</div>
+    `;
+        messagesContainer.appendChild(messageDiv);
+    });
+}
+
+
+function showChats() {
     const chatList = document.querySelector('#chat-list');
     getChats().then(chats => {
         console.log(`chats: ${chats}`)
-        chatList.innerHTML=''
+        chatList.innerHTML = ''
         chats.forEach(chat => {
             const chatLink = document.createElement('a');
             chatLink.href = '#';
@@ -127,8 +161,8 @@ function showChats(){
 
             // Optional: Add a tooltip or data attribute if you want to show more information on hover, etc.
             chatLink.setAttribute('title', `Owned by ${chat.owner} with ${chat.members.length} members`);
-
             chatList.appendChild(chatLink);
+            chatLink.onclick = () => displayChat(chat._id);  // Set up click event handler
         });
     }).catch(error => {
         console.error('Failed to load chat rooms:', error);
@@ -400,6 +434,8 @@ document.getElementById("loginButton").addEventListener("click", function () {
                 document.getElementById("navbar").style.display = "flex";
                 document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
                 connectToSocket(data.json()['userId'])
+                //TODO: remove hardcode
+                currentUserName = 'vova vova'
             } else {
                 alert('Login failed!');
             }

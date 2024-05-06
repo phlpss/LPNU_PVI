@@ -26,13 +26,38 @@ export function getChats() {
     })
 }
 
-export function createNewChat(name, members){
-    return new Promise( (resolve, reject) =>{
+export function createNewChat(name, members) {
+    return new Promise((resolve, reject) => {
         socket.emit("create chat", {
             name: name,
             members: members
-        }, (response)=>{
+        }, (response) => {
             resolve(response)
+        })
+    })
+}
+
+export function getChatWithMessages(chatId) {
+    return new Promise((resolve, reject) => {
+        resolve({
+            members: ['vova vova', 'vova2'],
+            chatName: 'Vova Test',
+            messages: [{
+                author: 'vova vova',
+                message: 'vova huy',
+                dateTime: new Date()
+            },
+                {
+                    author: 'vova2',
+                    message: 'vova huy 2',
+                    dateTime: new Date()
+                },
+                {
+                    author: 'vova vova',
+                    message: 'vova huy 3',
+                    dateTime: new Date()
+                }
+            ]
         })
     })
 }
