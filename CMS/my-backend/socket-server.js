@@ -110,9 +110,13 @@ io.on('connection', async (socket) => {
         console.log(chats)
 
         chats.forEach((chat) => {
-            socket.join(chat.name);
+            socket.join(sanitizeRoomName(chat.name));
             console.log(`${user.email} Joined chat room: ${chat.name}`);
         });
+    }
+
+    function sanitizeRoomName(roomName) {
+        return roomName.replace(/\s+/g, '_');
     }
 
     let user = await connectUser();
@@ -137,10 +141,7 @@ io.on('connection', async (socket) => {
             message: messageContent
         };
         console.log(newMessage)
-        socket.to(chat.name).emit('new message', newMessage);
-        callback({
-            status: "ok"
-        });
+        io.to(sanitizeRoomName(chat.name)).emit('new message', newMessage);
     });
 
     socket.on('get messages', async (msg, callback) => {
