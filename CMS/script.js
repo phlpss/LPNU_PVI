@@ -1,5 +1,5 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
-import {connectToSocket} from "./socket-client.js";
+import {connectToSocket, getUsers} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
@@ -38,7 +38,20 @@ $(function () {
         $('#addModal').show();
     });
 
-    $('#addNewChat').click(function () {
+    $('#addNewChat').click(async function () {
+        const invitationList = document.getElementById('invitationList');
+        invitationList.innerHTML = ''
+
+        const users = await getUsers();
+        console.log(users)
+
+        users.forEach(function (user) {
+            const option = document.createElement('option');
+            option.value = user;
+            option.text = user;
+            invitationList.appendChild(option);
+        });
+
         $('#newChatRoom').show();
     });
 
@@ -394,4 +407,4 @@ document.getElementById("signupPage").style.display = "none";
 document.getElementById("tabandcontent").style.display = "flex";
 document.getElementById("navbar").style.display = "flex";
 
-// connectToSocket('663790f8340fa69c3e6d5727')
+connectToSocket('663659fc6eb2c1c7343f1ddd')

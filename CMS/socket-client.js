@@ -9,3 +9,11 @@ export function connectToSocket(userId) {
         reconnectionDelayMax: 10000,
     });
 }
+
+export function getUsers() {
+    return new Promise((resolve, reject) => {
+        socket.emit("get users", {}, (response) => {
+            resolve(response);
+        })
+    })
+}
