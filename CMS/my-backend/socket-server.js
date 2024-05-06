@@ -139,16 +139,16 @@ io.on('connection', async (socket) => {
         });
     });
 
-    socket.on('get messages', (msg, callback) => {
-        io.emit('getMessageResponse', {"message": "messageResponse"})
-        callback({
-            status: "ok"
+    socket.on('get messages', async (msg, callback) => {
+        const messages = await Message.find({
+            chatId: msg.chatId
         });
+        callback(messages)
     });
 
-    async function findUserChats(email) {
+    async function findUserChats(user) {
         return Chat.find({
-            $or: [{owner: email}, {members: {$in: [email]}}],
+            $or: [{owner: user.email}, {members: {$in: [user.email]}}],
         });
     }
 
@@ -158,9 +158,10 @@ io.on('connection', async (socket) => {
         });
     }
 
-    socket.on('get all chats', async (relatedUser, callback) => {
+    socket.on('get chats', async (msg, callback) => {
         try {
-            const existingChats = await findUserChats(relatedUser);
+            const user = sidUserMap[socket.id]
+            const existingChats = await findUserChats(user);
             callback({
                 chats: existingChats
             })
