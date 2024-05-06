@@ -98,7 +98,8 @@ io.on('connection', async (socket) => {
         console.log(`User ${userid} connected`)
         sidUserMap[socket.id] = {
             userId: userid,
-            email: user.email
+            email: user.email,
+            username: user.username
         }
         return user;
     }
@@ -129,11 +130,14 @@ io.on('connection', async (socket) => {
         })
         const chat = await findChatById(chatId)
         await message.save()
-        socket.to(chat.name).emit('new message', {
-            from: from,
+        let newMessage = {
+            from: sidUserMap[socket.id].username,
             chatId: chatId,
+            dateTime: new Date(),
             message: messageContent
-        });
+        };
+        console.log(newMessage)
+        socket.to(chat.name).emit('new message', newMessage);
         callback({
             status: "ok"
         });
