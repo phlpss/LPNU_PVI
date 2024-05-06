@@ -106,8 +106,7 @@ io.on('connection', async (socket) => {
 
     async function joinChatRooms(user) {
         const chats = await findUserChats(user.email)
-        console.log('Found chats: ')
-        console.log(chats)
+        console.log(`Found chats: ${chats}`)
 
         chats.forEach((chat) => {
             socket.join(sanitizeRoomName(chat.name));
@@ -119,8 +118,14 @@ io.on('connection', async (socket) => {
         return roomName.replace(/\s+/g, '_');
     }
 
-    let user = await connectUser();
-    await joinChatRooms(user);
+    let user;
+    try {
+        user = await connectUser();
+        await joinChatRooms(user);
+    } catch (error) {
+        console.error("Error in connection handler:", error);
+        socket.emit('error', 'Failed to connect or join rooms');
+    }
 
     socket.on('send message', async (msg, callback) => {
         let from = sidUserMap[socket.id].email;
@@ -148,7 +153,7 @@ io.on('connection', async (socket) => {
         try {
             const chat = await Chat.findOne({_id: msg.chatId});
             if (!chat) {
-                callback({ error: "Chat not found" });
+                callback({error: "Chat not found"});
                 return;
             }
 
@@ -184,14 +189,17 @@ io.on('connection', async (socket) => {
             callback(response); // Send the combined data back to the client
         } catch (error) {
             console.error('Error fetching messages:', error);
-            callback({ error: "Failed to fetch messages" });
+            callback({error: "Failed to fetch messages"});
         }
     });
 
 
-    async function findUserChats(user) {
+    async function findUserChats(userEmail) {
         return Chat.find({
-            $or: [{owner: user.email}, {members: {$in: [user.email]}}],
+            $or: [
+                {owner: user.email},
+                {members: {$in: [user.email]}}
+            ],
         });
     }
 

@@ -161,6 +161,7 @@ function showChats() {
 
             // Optional: Add a tooltip or data attribute if you want to show more information on hover, etc.
             chatLink.setAttribute('title', `Owned by ${chat.owner} with ${chat.members.length} members`);
+            chatLink.setAttribute('id', `chat_${chat.name}`)
             chatList.appendChild(chatLink);
             chatLink.onclick = () => displayChat(chat._id);  // Set up click event handler
         });

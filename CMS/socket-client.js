@@ -1,13 +1,31 @@
 import {io} from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
 
-const messages = document.querySelector('.overflow-auto'); // Where messages will be displayed
-
 let socket
+let currentUserName = 'vova vova'
 
 export function connectToSocket(userId) {
     socket = io(`ws://localhost:3000?userid=${userId}`, {
         reconnectionDelayMax: 10000,
     });
+
+    socket.on('new message', (msg) => {
+        const messagesContainer = document.getElementById('chatMessages');
+        console.log('message received')
+        const date = new Date(msg.dateTime);
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        const messageDiv = document.createElement('div');
+        messageDiv.className = msg.from === currentUserName ? 'message-right' : 'message-left';
+        messageDiv.innerHTML = `
+        <div class="message-header">${msg.from} <span class="message-time">${formattedTime}</span></div>
+        <div class="message-body">${msg.message}</div>
+    `;
+        messagesContainer.appendChild(messageDiv);
+    })
+
 }
 
 export function getUsers() {
