@@ -17,3 +17,14 @@ export function getUsers() {
         })
     })
 }
+
+export function createNewChat(name, members){
+    return new Promise( (resolve, reject) =>{
+        socket.emit("create chat", {
+            name: name,
+            members: members
+        }, (response)=>{
+            resolve(response)
+        })
+    })
+}

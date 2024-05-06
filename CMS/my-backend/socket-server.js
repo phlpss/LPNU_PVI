@@ -179,15 +179,14 @@ io.on('connection', async (socket) => {
 
     socket.on('create chat', async (msg, callback) => {
         try {
+            const user = sidUserMap[socket.id]
             const newChat = new Chat({
-                owner: msg.owner,
+                owner: user.email,
                 name: msg.name,
                 members: msg.members
             });
             await newChat.save()
-            callback({
-                chat: newChat
-            })
+            callback(newChat)
         } catch (error) {
             emitError(`Error creating chat: ${error.message}`);
             console.error('Error checking chat:', error);

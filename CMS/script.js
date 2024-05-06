@@ -1,5 +1,5 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
-import {connectToSocket, getUsers} from "./socket-client.js";
+import {connectToSocket, createNewChat, getUsers} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
@@ -39,19 +39,7 @@ $(function () {
     });
 
     $('#addNewChat').click(async function () {
-        const invitationList = document.getElementById('invitationList');
-        invitationList.innerHTML = ''
-
-        const users = await getUsers();
-        console.log(users)
-
-        users.forEach(function (user) {
-            const option = document.createElement('option');
-            option.value = user;
-            option.text = user;
-            invitationList.appendChild(option);
-        });
-
+        await populateUserSelector();
         $('#newChatRoom').show();
     });
 
@@ -93,6 +81,15 @@ $(function () {
         $('#deleteModal').hide();
     })
 
+    $('#createNewChatRoom').click(function () {
+        createChat()
+        $('#newChatRoom').hide();
+    })
+
+    $('#closeNewChatRoom').click(function () {
+        $('#newChatRoom').hide();
+    })
+
     $('#previousPage').click(function () {
         if (currentPage > 1) {
             currentPage--;
@@ -116,6 +113,31 @@ $(function () {
     $(window).resize(resizeTableHeaders);
     resizeTableHeaders();
 });
+
+
+function createChat() {
+
+    var name = $('#newChatName').val();
+    var members = $('#invitationList').val();
+
+    createNewChat(name, members)
+        .then(res => console.log(res))
+}
+
+
+async function populateUserSelector() {
+    const invitationList = document.getElementById('invitationList');
+    invitationList.innerHTML = ''
+
+    const users = await getUsers();
+    console.log(users)
+
+    users.forEach(function (user) {
+        const option = new Option(user, user);
+        invitationList.appendChild(option);
+    });
+}
+
 
 let studentsData = [];
 
