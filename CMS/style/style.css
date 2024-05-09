@@ -258,7 +258,6 @@ aside, main {
 }
 /* Base styles for login and signup pages */
 .login-page, .signup-page {
-    display: flex;
     align-items: center;
     justify-content: center;
     color: #dddddd;
