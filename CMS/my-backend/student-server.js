@@ -8,11 +8,9 @@ const port = process.env.PORT || 4000;
 // Database connection
 const dbConfig = {
     host: 'localhost',
-    // user: 'Katya',
-    // password: 'Rfv11tgb22yhn33',
-    user: 'bingo',
-    password: 'bingo',
-    database: 'student_db',
+    user: 'Katya',
+    password: 'Rfv11tgb22yhn33',
+    database: 'student_db'
 };
 const pool = mysql.createPool(dbConfig);
 
