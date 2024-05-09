@@ -46,7 +46,7 @@ app.post('/api/signup', async (req, res) => {
 
         const newUser = new User({username, email, password: hashedPassword});
         await newUser.save();
-        res.status(201).send('User created successfully');
+        res.status(201).send({success: true, message: 'User created successfully'});
     } catch (error) {
         console.error('Signup error:', error);
         res.status(500).send('Error creating user');
