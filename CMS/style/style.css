@@ -359,3 +359,42 @@ aside, main {
         width: 80%;
     }
 }
+
+
+.message-left, .message-right {
+    color: black;
+    background-color: #f0f0f0;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.message-right {
+    background-color: #9ECF82;  /* Adjusted for better visibility */
+    align-self: flex-end;  /* Ensures right alignment */
+}
+
+.message-left {
+    align-self: flex-start;  /* Ensures left alignment */
+}
+
+.message-header {
+    font-size: 0.85em;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.message-time {
+    font-size: 0.75em;
+    color: #999;
+}
+
+.message-body {
+    font-size: 1em;
+}
+
+.container-fluid .overflow-auto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns all messages to start */
+}

@@ -1,8 +1,17 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
+import {
+    connectToSocket,
+    createNewChat,
+    getChats,
+    getChatWithMessages,
+    getUsers,
+    sendMessageToServer
+} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
 let currentStudentId = 1;
+let currentUserName
 
 $(function () {
     renderStudents(currentPage);
@@ -35,6 +44,11 @@ $(function () {
 
     $('#addStudentButton').click(function () {
         $('#addModal').show();
+    });
+
+    $('#addNewChat').click(async function () {
+        await populateUserSelector();
+        $('#newChatRoom').show();
     });
 
     $('#createStudentButton').click(createStudent);
@@ -75,6 +89,19 @@ $(function () {
         $('#deleteModal').hide();
     })
 
+    $('#createNewChatRoom').click(function () {
+        createChat()
+        $('#newChatRoom').hide();
+    })
+
+    $('#closeNewChatRoom').click(function () {
+        $('#newChatRoom').hide();
+    })
+
+    $('#sendButton').click(function (){
+        sendMessage()
+    })
+
     $('#previousPage').click(function () {
         if (currentPage > 1) {
             currentPage--;
@@ -99,6 +126,105 @@ $(function () {
     resizeTableHeaders();
 });
 
+function sendMessage(){
+
+    const messageInput = document.querySelector('.new-message textarea');
+    const message = messageInput.value.trim(); // Trim to remove extra whitespace
+
+    const activeChatLink = document.querySelector('.list-group-item.active');
+    const chatId = activeChatLink.getAttribute('id').replace('chat_', ''); // Extract the chatId
+
+    sendMessageToServer(chatId, message);
+
+    messageInput.value = '';
+}
+
+function displayChat(chatId) {
+    getChatWithMessages(chatId).then(chatData => {
+        updateChatDetails(chatData);
+    });
+}
+
+function updateChatDetails(chatData) {
+    const membersDiv = document.getElementById('members');
+    const messagesContainer = document.getElementById('chatMessages');
+
+    membersDiv.textContent = `Members: ${chatData.members.join(', ')}`;
+    document.getElementById('chatName').textContent = `Chat room ${chatData.chatName}`;
+
+    messagesContainer.innerHTML = '';
+
+    chatData.messages.forEach(msg => {
+        const date = new Date(msg.dateTime);
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true  // Use hour12:true for AM/PM format
+        });
+        const messageDiv = document.createElement('div');
+        messageDiv.className = msg.author === currentUserName ? 'message-right' : 'message-left';
+        messageDiv.innerHTML = `
+        <div class="message-header">${msg.author} <span class="message-time">${formattedTime}</span></div>
+        <div class="message-body">${msg.message}</div>
+    `;
+        messagesContainer.appendChild(messageDiv);
+    });
+}
+
+
+function showChats() {
+    const chatList = document.querySelector('#chat-list');
+    getChats().then(chats => {
+        console.log(`chats: ${chats}`)
+        chatList.innerHTML = ''
+        chats.forEach(chat => {
+            const chatLink = document.createElement('a');
+            chatLink.href = '#';
+            chatLink.className = 'list-group-item list-group-item-action';
+            chatLink.textContent = chat.name; // Display the chat's name
+
+            // Optional: Add a tooltip or data attribute if you want to show more information on hover, etc.
+            chatLink.setAttribute('title', `Owned by ${chat.owner} with ${chat.members.length} members`);
+            chatLink.setAttribute('id', `chat_${chat._id}`)
+            chatList.appendChild(chatLink);
+            chatLink.onclick = () => {
+                const allChatLinks = document.querySelectorAll('.list-group-item');
+                allChatLinks.forEach(link => link.classList.remove('active'));
+                chatLink.classList.add('active');
+                displayChat(chat._id)
+            }
+        });
+    }).catch(error => {
+        console.error('Failed to load chat rooms:', error);
+    });
+}
+
+function createChat() {
+
+    var name = $('#newChatName').val();
+    var members = $('#invitationList').val();
+
+    createNewChat(name, members)
+        .then(res => console.log(res))
+
+    setTimeout(showChats, 1000)
+}
+
+
+async function populateUserSelector() {
+    const invitationList = document.getElementById('invitationList');
+    invitationList.innerHTML = ''
+
+    const users = await getUsers();
+    console.log(users)
+
+    users.forEach(function (user) {
+        const option = new Option(user, user);
+        invitationList.appendChild(option);
+    });
+}
+
+
 let studentsData = [];
 
 export class Student {
@@ -116,6 +242,7 @@ function openTab(evt, tabName) {
     $(".tabcontent").hide();
     $(".tablinks").removeClass("active");
     $("#" + tabName).show();
+    showChats()
     $(evt.currentTarget).addClass("active");
 }
 
@@ -329,23 +456,22 @@ document.getElementById("loginButton").addEventListener("click", function () {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({email: email, password: password}),
+    }).then(response => {
+        if (!response.ok) {
+            alert('Login failed!');
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
     })
-        // .then(response => response.json())
         .then(data => {
-            if (data.status === 200) {
-
-                document.getElementById("loginPage").style.display = "none";
-                document.getElementById("signupPage").style.display = "none";
-                document.getElementById("tabandcontent").style.display = "flex";
-                document.getElementById("navbar").style.display = "flex";
-                document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
-            } else {
-                alert('Login failed!');
-            }
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("signupPage").style.display = "none";
+            document.getElementById("tabandcontent").style.display = "flex";
+            document.getElementById("navbar").style.display = "flex";
+            // document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
+            connectToSocket(data.userId, data.username)
+            currentUserName = data.username
         })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
 });
 
 document.getElementById('signupLink').addEventListener("click", function () {
@@ -383,3 +509,10 @@ document.getElementById("signupButton").addEventListener("click", function () {
             console.error('Error:', error);
         });
 });
+
+// document.getElementById("loginPage").style.display = "none";
+// document.getElementById("signupPage").style.display = "none";
+// document.getElementById("tabandcontent").style.display = "flex";
+// document.getElementById("navbar").style.display = "flex";
+
+// connectToSocket('663659fc6eb2c1c7343f1ddd')

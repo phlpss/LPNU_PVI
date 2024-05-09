@@ -4,7 +4,7 @@
     justify-content: center;
     align-items: center;
     position: fixed;
-    z-index: 1; /* Sit on top */
+    z-index: 1000; /* Sit on top */
     left: 0;
     top: 0;
     width: 100%;
@@ -148,4 +148,11 @@ button {
         background: none;
         color: white;
     }
+}
+
+#invitationList {
+    height: auto;           /* Allows the dropdown to expand based on the number of options visible */
+    max-height: 150px;      /* Maximum height before a scrollbar appears */
+    overflow-y: auto;       /* Enables vertical scrollbar if the content overflows */
+    width: 100%;            /* Optional: Adjust the width as needed */
 }
