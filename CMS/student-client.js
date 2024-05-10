@@ -1,6 +1,7 @@
 import {Student} from "./script.js";
 
-export let url = 'http://localhost:4000/api/v1/student';
+// export let url = 'http://localhost:4000/api/v1/student';
+// const address = `ws://192.168.193.49:3000?userid=${userId}`
 
 export function postStudent(student) {
     const data = JSON.stringify(student);
@@ -8,7 +9,7 @@ export function postStudent(student) {
     console.log('Inside postStudent');
     console.log(data);
     console.log(student);
-    return fetch(url, {
+    return fetch("http://192.168.193.49:4000/api/v1/student", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -35,7 +36,7 @@ export function putStudent(student) {
     const data = JSON.stringify(student);
     console.log(data);
 
-    return fetch(url, {
+    return fetch('http://192.168.193.49:4000/api/v1/student', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -62,7 +63,7 @@ export function delStudent(student) {
     const data = JSON.stringify({id: student.id});
     console.log(data);
 
-    return fetch(url, {
+    return fetch('http://192.168.193.49:4000/api/v1/student', {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'
@@ -86,7 +87,7 @@ export function delStudent(student) {
 }
 
 export function getStudents(){
-    return fetch(url, {
+    return fetch('http://192.168.193.49:4000/api/v1/student', {
         method: 'GET'
     }).then(response => {
         if (response.ok) {
@@ -104,6 +105,3 @@ export function getStudents(){
         return Promise.reject(error);
     });
 }
-
-// що таке (не)реляційна база даних
-// доступ до БД через PWO

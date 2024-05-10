@@ -7,7 +7,6 @@ const {Server} = require('socket.io');
 const cors = require('cors');
 const {User, Chat, Message} = require('./models.js')
 
-
 const app = express();
 const server = http.createServer(app);
 app.use(cors());
@@ -60,7 +59,6 @@ app.post('/api/login', async (req, res) => {
         const user = await User.findOne({email: email});
         console.log(user)
         if (user && await bcrypt.compare(password, user.password)) {
-            // Assuming a session or token based approach should be used here for real applications
             res.send({
                 userId: user._id,
                 email: user.email,
