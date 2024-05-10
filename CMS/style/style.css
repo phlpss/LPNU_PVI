@@ -245,6 +245,9 @@ aside, main {
     border-radius: 15px;
     margin-bottom: 10px;
     padding: 10px;
+    white-space: initial;
+    overflow-wrap: break-word;
+    max-width: 40%;
 }
 
 .message-right {
