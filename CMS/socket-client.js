@@ -1,66 +1,94 @@
-const Qs = require("qs");
+import {io} from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
 
-socket = io ();
-const chatForm = document.getElementById('chat-form');
-const chatMessages = document.querySelector('.chat-messages');
+let socket
+let currentUserName = 'katya'
+// const locallhost = `ws://localhost:3000?userid=${userId}`
+// const address = `ws://192.168.193.49:3000?userid=${userId}`
 
-const {username, room} = Qs.parse(location.search, {
-    ignoreQueryPrefix:true
-});
+export function connectToSocket(userId, username) {
+    socket = io(`ws://192.168.193.49:3000?userid=${userId}`, {
+        reconnectionDelayMax: 10000,
+    });
 
-let fromUser="John";
-let toUser="Maria";
-//socket.emit('userDetails',{fromUser,toUser});
+    currentUserName = username;
+    const notificationsContainer = document.getElementById('notificationsContent');
 
-function storeDetails() {
-    fromUser = document.getElementById('from').value;
-    toUser = document.getElementById('to').value;
-    element = document.querySelectorAll(".chat-messages");
-    socket.emit('userDetails',{fromUser,toUser}); //emits details of established chat
+    socket.on('new message', (msg) => {
+        const messagesContainer = document.getElementById('chatMessages');
+        console.log('message received')
+
+        // show notification on the bell
+        animateBell();
+
+        const date = new Date(msg.dateTime);
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        const messageDiv = document.createElement('div');
+        messageDiv.className = msg.from === currentUserName ? 'message-right' : 'message-left';
+        messageDiv.innerHTML = `
+        <div class="message-header">${msg.from} <span class="message-time">${formattedTime}</span></div>
+        <div class="message-body">${msg.message}</div>
+    `;
+        messagesContainer.appendChild(messageDiv);
+
+        // Create and append notification for new message
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'notification';
+        notificationDiv.textContent = `${msg.from}: ${msg.message}`;
+        notificationsContainer.appendChild(notificationDiv);
+    })
 }
 
-function storeTo() {
+function animateBell() {
+    const bell = document.getElementById('notificationBell');
+    bell.classList.add('animate');
 
-    //console.log(toUser);
+    bell.addEventListener('animationend', function() {
+        bell.classList.remove('animate');
+    });
 }
 
+export function getUsers() {
+    return new Promise((resolve, reject) => {
+        socket.emit("get users", {}, (response) => {
+            resolve(response);
+        })
+    })
+}
 
-//Submit message
-chatForm.addEventListener('submit', (e) => {
-    e.preventDefault(); //Prevents default logging to a file
-    const msg = e.target.elements.msg.value;
-    final = {
-        'fromUser':fromUser,
-        'toUser':toUser,
-        'msg':msg
-    };
-    socket.emit('chatMessage',final); //emits chat message along with sender and reciever to server
-    document.getElementById('msg').value=" ";
-});
+export function getChats() {
+    return new Promise((resolve, reject) => {
+        socket.emit("get chats", {}, (response) => {
+            resolve(response);
+        })
+    })
+}
 
-socket.on('output',(data) =>{
-    console.log(data);
-});
+export function createNewChat(name, members) {
+    return new Promise((resolve, reject) => {
+        socket.emit("create chat", {
+            name: name,
+            members: members
+        }, (response) => {
+            resolve(response)
+        })
+    })
+}
 
-socket.on('output',(data) => { //recieves the entire chat history upon logging in between two users and displays them
-    for(var i=0; i<data.length;i++) {
-        outputMessage(data[i]);
-    }
-    chatMessages.scrollTop=chatMessages.scrollHeight;
-});
+export function sendMessageToServer(chatId, message){
+    socket.emit('send message', {
+        chatId: chatId,
+        message: message
+    })
+}
 
-socket.on('message',(data) => { //recieves a message and displays it
-    outputMessage(data);
-    console.log(data);
-    chatMessages.scrollTop=chatMessages.scrollHeight;
-});
-
-function outputMessage(message) {
-    const div = document.createElement('div');
-    div.classList.add('message');
-    div.innerHTML=`<p class="meta">${message.from}<span> ${message.time}, ${message.date}</span></p>
-    <p class ="text">
-        ${message.message}
-    </p>`;
-    document.querySelector('.chat-messages').appendChild(div);
+export function getChatWithMessages(chatId) {
+    return new Promise((resolve, reject) => {
+        socket.emit('get messages', {chatId: chatId}, (response) => {
+            resolve(response)
+        })
+    })
 }

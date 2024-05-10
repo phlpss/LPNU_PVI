@@ -5,9 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const {Server} = require('socket.io');
 const cors = require('cors');
-
-const chatCollection = 'chats';         // Collection to store all chats
-const userCollection = 'onlineUsers';   // Collection to maintain list of currently online users
+const {User, Chat, Message} = require('./models.js')
 
 const app = express();
 const server = http.createServer(app);
@@ -16,36 +14,6 @@ app.use(express.json());
 
 const {Pool} = require('pg');
 const mongoose = require('mongoose');
-
-const Schema = mongoose.Schema;
-const chatSchema = new Schema({
-    owner: String,
-    name: String,
-    members: [String],
-});
-
-const Chat = mongoose.model('chat', chatSchema);
-const messageSchema = new Schema({
-    chatId: String,
-    author: String,
-    order: Number,
-    message: String,
-});
-
-const Message = mongoose.model('Message', messageSchema);
-
-const userSchema = new Schema({
-    username: {type: String, required: true, unique: true},
-    email: {
-        type: String,
-        trim: true,
-        unique: true,
-        required: true
-    },
-    password: {type: String, required: true},
-});
-
-const User = mongoose.model('User', userSchema);
 
 mongoose
     .connect('mongodb://localhost:27017/chat_db')
@@ -62,23 +30,14 @@ const io = socketIo(server, {
     },
 });
 
-// Create a pool to manage database connections
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: 'embryo',
-    port: 5432,
-});
-
 app.get('/', (req, res) => {
     res.send("dummy message");
 });
 
 const bcrypt = require('bcrypt');
+const {callback} = require("pg/lib/native/query");
 const saltRounds = 10;
 
-// Signup Endpoint
 app.post('/api/signup', async (req, res) => {
     try {
         const {username, email, password} = req.body;
@@ -86,22 +45,25 @@ app.post('/api/signup', async (req, res) => {
 
         const newUser = new User({username, email, password: hashedPassword});
         await newUser.save();
-        res.status(201).send('User created successfully');
+        res.status(201).send({success: true, message: 'User created successfully'});
     } catch (error) {
         console.error('Signup error:', error);
         res.status(500).send('Error creating user');
     }
 });
 
-// Login Endpoint
 app.post('/api/login', async (req, res) => {
     try {
-        const {username, password} = req.body;
-        const user = await User.findOne({username});
-
+        const {email, password} = req.body;
+        console.log('received email: ' + email)
+        const user = await User.findOne({email: email});
+        console.log(user)
         if (user && await bcrypt.compare(password, user.password)) {
-            // Assuming a session or token based approach should be used here for real applications
-            res.send('User authenticated successfully');
+            res.send({
+                userId: user._id,
+                email: user.email,
+                username: user.username
+            });
         } else {
             res.status(401).send('Authentication failed');
         }
@@ -111,35 +73,183 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+const sidUserMap = {};
 
-io.on('connection', (socket) => {
-    console.log('A user connected');
+async function checkChatNameAvalability(msg, socket) {
+    const existingChat = await Chat.find({
+        name: msg.name
+    });
+    if (existingChat !== undefined)
+        socket.emit('error', 'Error creating chat. Chat already exists')
+}
 
-    socket.on('chat message', (msg, callback) => {
-        // console.log('Message received:' + JSON.stringify(msg));
-        io.emit('chat message', msg)
-        callback({
-            status: "ok"
+io.on('connection', async (socket) => {
+    async function connectUser() {
+        let userid = socket.handshake.query.userid;
+        console.log(userid)
+        if (userid === undefined) {
+            socket.emit('error', 'userid is required')
+            socket.disconnect()
+        }
+        console.log(`User ${userid} connected`)
+        let user = await getUser(userid)
+        console.log(`found user: ${user}`)
+        console.log(`User ${userid} connected`)
+        sidUserMap[socket.id] = {
+            userId: userid,
+            email: user.email,
+            username: user.username
+        }
+        return user;
+    }
+
+    async function joinChatRooms(user) {
+        const chats = await findUserChats(user.email)
+        console.log(`Found chats: ${chats}`)
+
+        chats.forEach((chat) => {
+            socket.join(sanitizeRoomName(chat.name));
+            console.log(`${user.email} Joined chat room: ${chat.name}`);
         });
+    }
+
+    function sanitizeRoomName(roomName) {
+        return roomName.replace(/\s+/g, '_');
+    }
+
+    let user;
+    try {
+        user = await connectUser();
+        await joinChatRooms(user);
+    } catch (error) {
+        console.error("Error in connection handler:", error);
+        socket.emit('error', 'Failed to connect or join rooms');
+    }
+
+    socket.on('send message', async (msg, callback) => {
+        let from = sidUserMap[socket.id].email;
+        let chatId = msg.chatId;
+        let messageContent = msg.message;
+        let message = new Message({
+            chatId: chatId,
+            author: from,
+            datetime: new Date(),
+            message: messageContent,
+        })
+        const chat = await findChatById(chatId)
+        await message.save()
+        let newMessage = {
+            from: sidUserMap[socket.id].username,
+            chatId: chatId,
+            dateTime: new Date(),
+            message: messageContent
+        };
+        console.log(newMessage)
+        io.to(sanitizeRoomName(chat.name)).emit('new message', newMessage);
     });
 
-    socket.on('get messages', (msg, callback) => {
-        io.emit('getMessageResponse', {"message": "messageResponse"})
-        callback({
-            status: "ok"
-        });
-    });
-
-    socket.on('get all chats', async (relatedUser) => {
+    socket.on('get messages', async (msg, callback) => {
         try {
-            const existingChats = await Chat.find({
-                $or: [{owner: relatedUser}, {members: {$in: [relatedUser]}}],
-            });
-            socket.emit('all chats', existingChats);
+            const chat = await Chat.findOne({_id: msg.chatId});
+            if (!chat) {
+                callback({error: "Chat not found"});
+                return;
+            }
+
+            const messages = await Message.find({chatId: msg.chatId});
+
+            // Collect all unique email addresses from messages to minimize database queries.
+            const userEmails = [...new Set(messages.map(message => message.author))];
+
+            // Fetch user details for each unique email.
+            const users = await User.find({email: {$in: userEmails}});
+            const emailToUsernameMap = users.reduce((acc, user) => {
+                acc[user.email] = user.username; // Create a map of email to username
+                return acc;
+            }, {});
+
+            // Map messages to include usernames instead of email addresses
+            const messageData = messages.map(m => ({
+                author: emailToUsernameMap[m.author],
+                message: m.message,
+                dateTime: m.datetime
+            }));
+
+            // Resolve usernames for chat members
+            const memberUsernames = await User.find({email: {$in: chat.members}});
+            const memberNames = memberUsernames.map(user => user.username);
+
+            const response = {
+                chatName: chat.name,
+                members: memberNames,
+                messages: messageData
+            };
+
+            callback(response); // Send the combined data back to the client
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            callback({error: "Failed to fetch messages"});
+        }
+    });
+
+
+    async function findUserChats(userEmail) {
+        return Chat.find({
+            $or: [
+                {owner: user.email},
+                {members: {$in: [user.email]}}
+            ],
+        });
+    }
+
+    async function findChatById(chatId) {
+        return Chat.findOne({
+            _id: chatId
+        });
+    }
+
+    socket.on('get users', async (msg, callback) => {
+        console.log('Get users request')
+        const users = await User.find()
+        const emails = users.map(user => user.email)
+        callback(emails)
+    })
+
+    socket.on('get chats', async (msg, callback) => {
+        try {
+            const user = sidUserMap[socket.id]
+            const existingChats = await findUserChats(user);
+            callback(existingChats)
         } catch (error) {
             console.error('Error checking chat name availability:', error);
         }
     });
+
+    socket.on('create chat', async (msg, callback) => {
+        try {
+            const user = sidUserMap[socket.id]
+            const newChat = new Chat({
+                owner: user.email,
+                name: msg.name,
+                members: msg.members
+            });
+            await newChat.save()
+            callback(newChat)
+        } catch (error) {
+            emitError(`Error creating chat: ${error.message}`);
+            console.error('Error checking chat:', error);
+        }
+    });
+
+    async function getUser(userId) {
+        return User.findOne({
+            _id: userId
+        })
+    }
+
+    function emitError(message) {
+        socket.emit('error', message)
+    }
 
     socket.on('disconnect', () => {
         console.log('User disconnected');

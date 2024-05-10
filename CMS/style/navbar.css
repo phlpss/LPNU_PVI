@@ -35,11 +35,19 @@
 .dropdown-content {
     display: none;
     position: absolute;
-    background: linear-gradient(0.3turn,
-    rgba(0, 0, 0, 0.9), rgba(26, 26, 26, 0.9), rgba(24, 24, 24, 0.9), rgba(0, 0, 0, 0.9));
+    align-content: center;
+    background: #eeeeee;
+    border-radius: 3px;
+    color: #272727;
     min-width: 160px;
     font-size: 18px;
     padding: 15px;
+}
+
+.dropdown-content > * {
+    background: none;
+    color: #272727;
+    font-size: 18px;
 }
 
 .notification {
@@ -48,7 +56,6 @@
     /*border: 1px solid #ddd;*/
     background: linear-gradient(0.3turn,
     rgba(0, 0, 0, 0.9), rgba(26, 26, 26, 0.9), rgba(24, 24, 24, 0.9), rgba(0, 0, 0, 0.9));
-
 }
 
 .dropdown:hover .dropdown-content {
@@ -84,12 +91,15 @@
 
 @keyframes swing {
     0% { transform: rotate(0deg); }
-    50% { transform: rotate(15deg); }
-    100% { transform: rotate(-15deg); }
+    20% { transform: rotate(15deg); }
+    40% { transform: rotate(-10deg); }
+    60% { transform: rotate(5deg); }
+    80% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
 }
 
-#notificationsDropdown:hover #notificationBell{
-    animation: swing 0.5s ease-in-out infinite;
+#notificationBell.animate {
+    animation: swing 0.5s ease-in-out;
 }
 
 @media only screen and (max-width: 600px) {

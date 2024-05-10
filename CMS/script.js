@@ -1,8 +1,17 @@
 import {delStudent, getStudents, postStudent, putStudent} from "./student-client.js";
+import {
+    connectToSocket,
+    createNewChat,
+    getChats,
+    getChatWithMessages,
+    getUsers,
+    sendMessageToServer
+} from "./socket-client.js";
 
 let currentPage = 1;
 const studentsPerPage = 10;
 let currentStudentId = 1;
+let currentUserName = "Default User";
 
 $(function () {
     renderStudents(currentPage);
@@ -21,7 +30,14 @@ $(function () {
 
     $('#notificationBell').click(function (e) {
         openTab(e, 'Messages');
+
+        // Select the notifications container and clear all its contents
+        const notificationsContainer = document.getElementById('notificationsContent');
+        while (notificationsContainer.firstChild) {
+            notificationsContainer.removeChild(notificationsContainer.firstChild);
+        }
     });
+
 
     $('.modal .cancelStudentBt').click(function () {
         $(this).closest('.modal').hide();
@@ -35,6 +51,11 @@ $(function () {
 
     $('#addStudentButton').click(function () {
         $('#addModal').show();
+    });
+
+    $('#addNewChat').click(async function () {
+        await populateUserSelector();
+        $('#newChatRoom').show();
     });
 
     $('#createStudentButton').click(createStudent);
@@ -75,6 +96,19 @@ $(function () {
         $('#deleteModal').hide();
     })
 
+    $('#createNewChatRoom').click(function () {
+        createChat()
+        $('#newChatRoom').hide();
+    })
+
+    $('#closeNewChatRoom').click(function () {
+        $('#newChatRoom').hide();
+    })
+
+    $('#sendButton').click(function () {
+        sendMessage()
+    })
+
     $('#previousPage').click(function () {
         if (currentPage > 1) {
             currentPage--;
@@ -99,8 +133,99 @@ $(function () {
     resizeTableHeaders();
 });
 
-let studentsData = [
-];
+function sendMessage() {
+    const messageInput = document.querySelector('.new-message textarea');
+    const message = messageInput.value.trim();
+
+    const activeChatLink = document.querySelector('.list-group-item.active');
+    const chatId = activeChatLink.getAttribute('id').replace('chat_', '');
+
+    sendMessageToServer(chatId, message);
+    messageInput.value = '';
+}
+
+function displayChat(chatId) {
+    getChatWithMessages(chatId).then(chatData => {
+        updateChatDetails(chatData);
+    });
+}
+
+function updateChatDetails(chatData) {
+    const membersDiv = document.getElementById('members');
+    const messagesContainer = document.getElementById('chatMessages');
+
+    membersDiv.textContent = `Members: ${chatData.members.join(', ')}`;
+    // document.getElementById('chatName').textContent = `Chat room ${chatData.chatName}`;
+
+    messagesContainer.innerHTML = '';
+
+    chatData.messages.forEach(msg => {
+        const date = new Date(msg.dateTime);
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true  // Use hour12:true for AM/PM format
+        });
+        const messageDiv = document.createElement('div');
+        messageDiv.className = msg.author === currentUserName ? 'message-right' : 'message-left';
+        messageDiv.innerHTML = `
+        <div class="message-header">${msg.author} <span class="message-time">${formattedTime}</span></div>
+        <div class="message-body">${msg.message}</div>
+    `;
+        messagesContainer.appendChild(messageDiv);
+    });
+}
+
+function showChats() {
+    const chatList = document.querySelector('#chat-list');
+    getChats().then(chats => {
+        console.log(`chats: ${chats}`)
+        chatList.innerHTML = ''
+        chats.forEach(chat => {
+            const chatLink = document.createElement('a');
+            chatLink.href = '#';
+            chatLink.className = 'list-group-item list-group-item-action';
+            chatLink.textContent = chat.name;
+
+            chatLink.setAttribute('title', `Owned by ${chat.owner} with ${chat.members.length} members`);
+            chatLink.setAttribute('id', `chat_${chat._id}`)
+            chatList.appendChild(chatLink);
+            chatLink.onclick = () => {
+                const allChatLinks = document.querySelectorAll('.list-group-item');
+                allChatLinks.forEach(link => link.classList.remove('active'));
+                chatLink.classList.add('active');
+                displayChat(chat._id)
+            }
+        });
+    }).catch(error => {
+        console.error('Failed to load chat rooms:', error);
+    });
+}
+
+function createChat() {
+    const name = $('#newChatName').val();
+    const members = $('#invitationList').val();
+
+    createNewChat(name, members)
+        .then(res => console.log(res))
+
+    // setTimeout(showChats, 1000)
+}
+
+async function populateUserSelector() {
+    const invitationList = document.getElementById('invitationList');
+    invitationList.innerHTML = ''
+
+    const users = await getUsers();
+    console.log(users)
+
+    users.forEach(function (user) {
+        const option = new Option(user, user);
+        invitationList.appendChild(option);
+    });
+}
+
+let studentsData = [];
 
 export class Student {
     constructor(id, group, name, gender, birthday, status) {
@@ -117,6 +242,7 @@ function openTab(evt, tabName) {
     $(".tabcontent").hide();
     $(".tablinks").removeClass("active");
     $("#" + tabName).show();
+    showChats()
     $(evt.currentTarget).addClass("active");
 }
 
@@ -208,7 +334,7 @@ function createStudent() {
 }
 
 function addStudent(group, name, gender, birthday) {
-    const newStudent = new Student(null,group, name, gender, birthday, 'Active');
+    const newStudent = new Student(null, group, name, gender, birthday, 'Active');
 
     postStudent(newStudent).then(data => {
         studentsData.push(newStudent);
@@ -319,54 +445,54 @@ function resizeTableHeaders() {
     }
 }
 
-document.getElementById("loginButton").addEventListener("click", function() {
-    let userFirstName = document.getElementById("loginFirstName").value;
-    let userLastName = document.getElementById("loginLastName").value;
+document.getElementById("loginButton").addEventListener("click", function () {
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
 
     // Assume we have an API endpoint "/api/login" for logging in users
-    fetch('/api/login', {
+    fetch('http://192.168.193.49:3000/api/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ firstName: userFirstName, lastName: userLastName }),
+        body: JSON.stringify({email: email, password: password}),
+    }).then(response => {
+        if (!response.ok) {
+            alert('Login failed!');
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
     })
-        .then(response => response.json())
         .then(data => {
-            // Handle response
-            console.log('Success:', data);
-            if (data.success) {
-                document.getElementById("loginPage").style.display = "none";
-                document.getElementById("tabandcontent").style.display = "flex";
-                document.getElementById("navbar").style.display = "flex";
-                document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
-            } else {
-                alert('Login failed!');
-            }
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("signupPage").style.display = "none";
+            document.getElementById("tabandcontent").style.display = "flex";
+            document.getElementById("navbar").style.display = "flex";
+            currentUserName = data.username;
+            document.getElementById("userName").textContent = currentUserName;
+            connectToSocket(data.userId, currentUserName)
         })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
 });
 
-document.getElementById('signupLink').addEventListener("click", function() {
+document.getElementById('signupLink').addEventListener("click", function () {
     document.getElementById("loginPage").style.display = "none";
     document.getElementById("signupPage").style.display = "flex";
-})
-document.getElementById("signupButton").addEventListener("click", function() {
+});
+
+document.getElementById("signupButton").addEventListener("click", function () {
     let userFirstName = document.getElementById("signupFirstName").value;
     let userLastName = document.getElementById("signupLastName").value;
     let userFullName = userFirstName + " " + userLastName;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
 
     // Assume we have an API endpoint "/api/signup" for signing up users
-    fetch('http://localhost:3000/api/signup', {
+    fetch('http://192.168.193.49:3000/api/signup', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username: userFullName, email: email, password: password }),
+        body: JSON.stringify({username: userFullName, email: email, password: password}),
     })
         .then(response => response.json())
         .then(data => {
@@ -384,3 +510,12 @@ document.getElementById("signupButton").addEventListener("click", function() {
             console.error('Error:', error);
         });
 });
+
+document.getElementById("logoutButton").addEventListener("click", function() {
+    document.getElementById("loginPage").style.display = "flex";
+    document.getElementById("signupPage").style.display = "none";
+    document.getElementById("tabandcontent").style.display = "none";
+    document.getElementById("navbar").style.display = "none";
+})
+
+// connectToSocket('663659fc6eb2c1c7343f1ddd')
