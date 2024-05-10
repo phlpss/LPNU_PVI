@@ -11,7 +11,7 @@ import {
 let currentPage = 1;
 const studentsPerPage = 10;
 let currentStudentId = 1;
-let currentUserName
+let currentUserName = "Default User";
 
 $(function () {
     renderStudents(currentPage);
@@ -98,7 +98,7 @@ $(function () {
         $('#newChatRoom').hide();
     })
 
-    $('#sendButton').click(function (){
+    $('#sendButton').click(function () {
         sendMessage()
     })
 
@@ -126,7 +126,7 @@ $(function () {
     resizeTableHeaders();
 });
 
-function sendMessage(){
+function sendMessage() {
 
     const messageInput = document.querySelector('.new-message textarea');
     const message = messageInput.value.trim(); // Trim to remove extra whitespace
@@ -150,7 +150,7 @@ function updateChatDetails(chatData) {
     const messagesContainer = document.getElementById('chatMessages');
 
     membersDiv.textContent = `Members: ${chatData.members.join(', ')}`;
-    document.getElementById('chatName').textContent = `Chat room ${chatData.chatName}`;
+    // document.getElementById('chatName').textContent = `Chat room ${chatData.chatName}`;
 
     messagesContainer.innerHTML = '';
 
@@ -468,16 +468,17 @@ document.getElementById("loginButton").addEventListener("click", function () {
             document.getElementById("signupPage").style.display = "none";
             document.getElementById("tabandcontent").style.display = "flex";
             document.getElementById("navbar").style.display = "flex";
-            // document.getElementById("userName").textContent = data.user.firstName + " " + data.user.lastName;
-            connectToSocket(data.userId, data.username)
-            currentUserName = data.username
+            currentUserName = data.username;
+            document.getElementById("userName").textContent = currentUserName;
+            connectToSocket(data.userId, currentUserName)
         })
 });
 
 document.getElementById('signupLink').addEventListener("click", function () {
     document.getElementById("loginPage").style.display = "none";
     document.getElementById("signupPage").style.display = "flex";
-})
+});
+
 document.getElementById("signupButton").addEventListener("click", function () {
     let userFirstName = document.getElementById("signupFirstName").value;
     let userLastName = document.getElementById("signupLastName").value;

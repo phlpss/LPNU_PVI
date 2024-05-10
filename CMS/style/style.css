@@ -124,12 +124,10 @@ aside, main {
 
 /* MESSAGES SECTION */
 #Messages {
-    display: none; /* Initially hidden like other tabcontent, shown when activated */
-    /*flex-direction: row;*/
+    display: none;
     color: #dddddd;
     padding: 20px;
     margin: 20px;
-    /*overflow: hidden; !* Ensures no overflow *!*/
 }
 
 #Messages .row-h-100 {
@@ -215,14 +213,15 @@ aside, main {
 }
 
 #Messages textarea {
-    /*width: 100%;*/
     height: 15px;
     background: rgba(255, 255, 255, 0.1);
     color: #ddd;
     border: 1px solid #667e93;
     padding: 10px;
     border-radius: 5px;
-    margin: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 90%;
 }
 
 #Messages .btn-link {
@@ -240,13 +239,50 @@ aside, main {
     color: #3b4854;
 }
 
+.message-left, .message-right {
+    color: black;
+    background-color: #f0f0f0;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.message-right {
+    background-color: #9ECF82;  /* Adjusted for better visibility */
+    align-self: flex-end;  /* Ensures right alignment */
+}
+
+.message-left {
+    align-self: flex-start;  /* Ensures left alignment */
+}
+
+.message-header {
+    font-size: 0.85em;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.message-time {
+    font-size: 0.75em;
+    color: #999;
+}
+
+.message-body {
+    font-size: 1em;
+}
+
+.container-fluid .overflow-auto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns all messages to start */
+}
+
 /* Additional media queries and responsive adjustments as needed */
 @media (max-width: 768px) {
     #Messages .row {
         flex-direction: column;
     }
 }
-
 
 /* LOG IN PAGE */
 /* SING UP PAGE */
@@ -357,43 +393,4 @@ aside, main {
     .login-page .row, .signup-page .row {
         width: 80%;
     }
-}
-
-
-.message-left, .message-right {
-    color: black;
-    background-color: #f0f0f0;
-    border-radius: 15px;
-    margin-bottom: 10px;
-    padding: 10px;
-}
-
-.message-right {
-    background-color: #9ECF82;  /* Adjusted for better visibility */
-    align-self: flex-end;  /* Ensures right alignment */
-}
-
-.message-left {
-    align-self: flex-start;  /* Ensures left alignment */
-}
-
-.message-header {
-    font-size: 0.85em;
-    margin-bottom: 5px;
-    color: #666;
-}
-
-.message-time {
-    font-size: 0.75em;
-    color: #999;
-}
-
-.message-body {
-    font-size: 1em;
-}
-
-.container-fluid .overflow-auto {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Aligns all messages to start */
 }
