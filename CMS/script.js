@@ -30,7 +30,14 @@ $(function () {
 
     $('#notificationBell').click(function (e) {
         openTab(e, 'Messages');
+
+        // Select the notifications container and clear all its contents
+        const notificationsContainer = document.getElementById('notificationsContent');
+        while (notificationsContainer.firstChild) {
+            notificationsContainer.removeChild(notificationsContainer.firstChild);
+        }
     });
+
 
     $('.modal .cancelStudentBt').click(function () {
         $(this).closest('.modal').hide();
@@ -127,15 +134,13 @@ $(function () {
 });
 
 function sendMessage() {
-
     const messageInput = document.querySelector('.new-message textarea');
-    const message = messageInput.value.trim(); // Trim to remove extra whitespace
+    const message = messageInput.value.trim();
 
     const activeChatLink = document.querySelector('.list-group-item.active');
-    const chatId = activeChatLink.getAttribute('id').replace('chat_', ''); // Extract the chatId
+    const chatId = activeChatLink.getAttribute('id').replace('chat_', '');
 
     sendMessageToServer(chatId, message);
-
     messageInput.value = '';
 }
 
@@ -171,7 +176,6 @@ function updateChatDetails(chatData) {
     });
 }
 
-
 function showChats() {
     const chatList = document.querySelector('#chat-list');
     getChats().then(chats => {
@@ -181,9 +185,8 @@ function showChats() {
             const chatLink = document.createElement('a');
             chatLink.href = '#';
             chatLink.className = 'list-group-item list-group-item-action';
-            chatLink.textContent = chat.name; // Display the chat's name
+            chatLink.textContent = chat.name;
 
-            // Optional: Add a tooltip or data attribute if you want to show more information on hover, etc.
             chatLink.setAttribute('title', `Owned by ${chat.owner} with ${chat.members.length} members`);
             chatLink.setAttribute('id', `chat_${chat._id}`)
             chatList.appendChild(chatLink);
@@ -200,16 +203,14 @@ function showChats() {
 }
 
 function createChat() {
-
-    var name = $('#newChatName').val();
-    var members = $('#invitationList').val();
+    const name = $('#newChatName').val();
+    const members = $('#invitationList').val();
 
     createNewChat(name, members)
         .then(res => console.log(res))
 
-    setTimeout(showChats, 1000)
+    // setTimeout(showChats, 1000)
 }
-
 
 async function populateUserSelector() {
     const invitationList = document.getElementById('invitationList');
@@ -223,7 +224,6 @@ async function populateUserSelector() {
         invitationList.appendChild(option);
     });
 }
-
 
 let studentsData = [];
 
@@ -450,7 +450,7 @@ document.getElementById("loginButton").addEventListener("click", function () {
     let password = document.getElementById("password").value;
 
     // Assume we have an API endpoint "/api/login" for logging in users
-    fetch('http://localhost:3000/api/login', {
+    fetch('http://192.168.193.49:3000/api/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -487,7 +487,7 @@ document.getElementById("signupButton").addEventListener("click", function () {
     const password = document.getElementById("signupPassword").value;
 
     // Assume we have an API endpoint "/api/signup" for signing up users
-    fetch('http://localhost:3000/api/signup', {
+    fetch('http://192.168.193.49:3000/api/signup', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -511,9 +511,11 @@ document.getElementById("signupButton").addEventListener("click", function () {
         });
 });
 
-// document.getElementById("loginPage").style.display = "none";
-// document.getElementById("signupPage").style.display = "none";
-// document.getElementById("tabandcontent").style.display = "flex";
-// document.getElementById("navbar").style.display = "flex";
+document.getElementById("logoutButton").addEventListener("click", function() {
+    document.getElementById("loginPage").style.display = "flex";
+    document.getElementById("signupPage").style.display = "none";
+    document.getElementById("tabandcontent").style.display = "none";
+    document.getElementById("navbar").style.display = "none";
+})
 
 // connectToSocket('663659fc6eb2c1c7343f1ddd')

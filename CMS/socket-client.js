@@ -1,18 +1,25 @@
 import {io} from "https://cdn.socket.io/4.7.5/socket.io.esm.min.js";
 
 let socket
-let currentUserName = 'vova vova'
+let currentUserName = 'katya'
+// const locallhost = `ws://localhost:3000?userid=${userId}`
+// const address = `ws://192.168.193.49:3000?userid=${userId}`
 
 export function connectToSocket(userId, username) {
-    socket = io(`ws://localhost:3000?userid=${userId}`, {
+    socket = io(`ws://192.168.193.49:3000?userid=${userId}`, {
         reconnectionDelayMax: 10000,
     });
 
-    currentUserName = username
+    currentUserName = username;
+    const notificationsContainer = document.getElementById('notificationsContent');
 
     socket.on('new message', (msg) => {
         const messagesContainer = document.getElementById('chatMessages');
         console.log('message received')
+
+        // show notification on the bell
+        animateBell();
+
         const date = new Date(msg.dateTime);
         const formattedTime = date.toLocaleTimeString('en-US', {
             hour: '2-digit',
@@ -26,8 +33,22 @@ export function connectToSocket(userId, username) {
         <div class="message-body">${msg.message}</div>
     `;
         messagesContainer.appendChild(messageDiv);
-    })
 
+        // Create and append notification for new message
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'notification';
+        notificationDiv.textContent = `${msg.from}: ${msg.message}`;
+        notificationsContainer.appendChild(notificationDiv);
+    })
+}
+
+function animateBell() {
+    const bell = document.getElementById('notificationBell');
+    bell.classList.add('animate');
+
+    bell.addEventListener('animationend', function() {
+        bell.classList.remove('animate');
+    });
 }
 
 export function getUsers() {
