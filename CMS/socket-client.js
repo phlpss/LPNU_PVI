@@ -6,7 +6,7 @@ let currentUserName = 'katya'
 // const address = `ws://192.168.193.49:3000?userid=${userId}`
 
 export function connectToSocket(userId, username) {
-    socket = io(`ws://192.168.193.49:3000?userid=${userId}`, {
+    socket = io(`ws://localhost:3000?userid=${userId}`, {
         reconnectionDelayMax: 10000,
     });
 

@@ -450,7 +450,7 @@ document.getElementById("loginButton").addEventListener("click", function () {
     let password = document.getElementById("password").value;
 
     // Assume we have an API endpoint "/api/login" for logging in users
-    fetch('http://192.168.193.49:3000/api/login', {
+    fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -487,7 +487,7 @@ document.getElementById("signupButton").addEventListener("click", function () {
     const password = document.getElementById("signupPassword").value;
 
     // Assume we have an API endpoint "/api/signup" for signing up users
-    fetch('http://192.168.193.49:3000/api/signup', {
+    fetch('http://localhost:3000/api/signup', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
