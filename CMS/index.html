@@ -18,13 +18,13 @@
 
 
     <script src="script.js" type="module" defer></script>
-    <script src="drag.js" type="module" defer></script>
+    <script src="tasks.js" type="module" defer></script>
     <script src="student-client.js" type="module" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>-->
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>-->
 </head>
 <body>
 
@@ -294,23 +294,14 @@
             <div class="lanes">
                 <div class="swim-lane" id="todo-lane">
                     <h3 class="heading">TODO</h3>
-
-                    <p class="task" draggable="true">Buy shoes</p>
-                    <p class="task" draggable="true">Feed the dog</p>
-                    <p class="task" draggable="true">Eat some piece of cake</p>
                 </div>
 
-                <div class="swim-lane">
+                <div class="swim-lane" id="doing-lane">
                     <h3 class="heading">Doing</h3>
-                    <p class="task" draggable="true">Play with a little funny pig</p>
-                    <p class="task" draggable="true">Do this lab1 at last!</p>
                 </div>
 
-                <div class="swim-lane">
+                <div class="swim-lane" id="done-lane">
                     <h3 class="heading">Done</h3>
-                    <p class="task" draggable="true">
-                        Play video games for 20 hours
-                    </p>
                 </div>
             </div>
         </div>
@@ -319,7 +310,7 @@
     <div id="newChatRoom" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add New  Chat</h2>
+                <h2>Add New Chat</h2>
             </div>
             <div class="modal-body">
                 <div class="input-group">
@@ -338,7 +329,7 @@
                                                    id="closeNewChatBt" width="40" height="40" alt="Cross Icon">
                 </button>
                 <button id="createNewChatRoom"><img src='assets/tick_icon.svg' class="confirmStudentBt"
-                                                      id="confirmNewChatBt" width="40" height="40" alt="Tick Icon">
+                                                    id="confirmNewChatBt" width="40" height="40" alt="Tick Icon">
                 </button>
             </div>
         </div>
@@ -351,7 +342,7 @@
                 <div class="col-4">
                     <div class="chatroom-header">
                         <h4> Chat room </h4>
-                        <button class="btn btn-link" id ="addNewChat">+ New chat room</button>
+                        <button class="btn btn-link" id="addNewChat">+ New chat room</button>
                     </div>
                     <div class="list-group" id="chat-list"></div>
                 </div>
@@ -360,14 +351,15 @@
                 <div class="col-8">
                     <div class="border-bottom pb-2 mb-2">
                         <div id="chatName"></div>
-                        <div id ="members"></div>
+                        <div id="members"></div>
                     </div>
-                    <div class="overflow-auto chat-messages" style="height:300px;" id ="chatMessages">
+                    <div class="overflow-auto chat-messages" style="height:300px;" id="chatMessages">
                         <!-- Message content would go here -->
                     </div>
                     <div class="new-message">
                         <label style="width: 95%">
-                            <textarea class="form-control mt-2" placeholder="Type a message..." style="width: 95%"></textarea>
+                            <textarea class="form-control mt-2" placeholder="Type a message..."
+                                      style="width: 95%"></textarea>
                         </label>
                         <button id="sendButton"><img src='assets/send_icon.svg' class="sender"
                                                      alt="Send message button"></button>
