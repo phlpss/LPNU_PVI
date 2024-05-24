@@ -24,8 +24,6 @@ const taskSchema = new mongoose.Schema({
 
 const Task = mongoose.model('Task', taskSchema);
 
-// Routes
-// Routes
 app.get('/tasks', async (req, res) => {
     const tasks = await Task.find();
     res.json(tasks);
@@ -40,20 +38,8 @@ app.post('/tasks', async (req, res) => {
 
     const newTask = new Task({ text, lane });
     await newTask.save();
-    res.status(201).send('Task created');
+    res.status(201).json(newTask);  // Return the new task object
 });
-
-// app.put('/tasks/:id', async (req, res) => {
-//     const { id } = req.params;
-//     const { lane } = req.body;
-//
-//     if (!lane) {
-//         return res.status(400).send('Lane is required');
-//     }
-//
-//     await Task.findByIdAndUpdate(id, { lane });
-//     res.send('Task updated');
-// });
 
 app.put('/tasks/:id', async (req, res) => {
     const { id } = req.params;
@@ -73,8 +59,6 @@ app.put('/tasks/:id', async (req, res) => {
         res.status(500).send('Error updating task');
     }
 });
-
-
 
 // Start the server
 const PORT = 5000;

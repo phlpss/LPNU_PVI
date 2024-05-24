@@ -16,6 +16,7 @@ const form = document.getElementById('todo-form');
 const swimLanes = document.querySelectorAll('.swim-lane');
 const draggables = document.querySelectorAll(".task");
 const droppables = document.querySelectorAll(".swim-lane");
+
 form.addEventListener('submit', async function (event) {
     event.preventDefault();
     const input = document.getElementById('todo-input');
@@ -64,7 +65,7 @@ swimLanes.forEach((lane) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ lane: newLane }),
+            body: JSON.stringify({lane: newLane}),
         });
 
         lane.appendChild(draggingTask);
@@ -96,16 +97,17 @@ droppables.forEach((zone) => {
 function getClosestTask(lane, mouseY) {
     const tasks = Array.from(lane.querySelectorAll('.task'));
     return tasks.reduce((closest, task) => {
-        const { top } = task.getBoundingClientRect();
+        const {top} = task.getBoundingClientRect();
         const offset = mouseY - top;
         const taskOffset = Math.abs(offset);
         if (taskOffset < closest.offset) {
-            return { task, offset: taskOffset };
+            return {task, offset: taskOffset};
         } else {
             return closest;
         }
-    }, { task: null, offset: Number.POSITIVE_INFINITY }).task;
+    }, {task: null, offset: Number.POSITIVE_INFINITY}).task;
 }
+
 function insertAboveTask(zone, mouseY) {
     const els = zone.querySelectorAll(".task:not(.is-dragging)");
 
@@ -113,7 +115,7 @@ function insertAboveTask(zone, mouseY) {
     let closestOffset = Number.NEGATIVE_INFINITY;
 
     els.forEach((task) => {
-        const { top } = task.getBoundingClientRect();
+        const {top} = task.getBoundingClientRect();
         const offset = mouseY - top;
 
         if (offset < 0 && offset > closestOffset) {
@@ -141,7 +143,4 @@ function createTaskElement(text, id) {
     });
 
     return taskElement;
-}
-function generateUniqueId() {
-    return Math.random().toString(36).substr(2, 9);
 }
